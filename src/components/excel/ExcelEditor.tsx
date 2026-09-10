@@ -334,26 +334,29 @@ export const ExcelEditor: React.FC<ExcelEditorProps> = ({
   ];
 
   return (
-    <div className="flex flex-col h-[calc(100vh-48px)] bg-neutral-100 overflow-hidden font-sans">
-      {/* 1CM EXCEL FORMATTING TOOLBAR WITH DYNAMIC DROPDOWNS (height: 38px / 1cm) */}
-      <div className="bg-white border-b border-neutral-300 shadow-xs z-30 select-none h-[38px] min-h-[38px] flex items-center justify-between px-2 gap-2 text-xs">
+    <div className="flex flex-col h-full bg-neutral-100 overflow-hidden font-sans">
+      {/* 0.5CM EXCEL FORMATTING TOOLBAR WITH DYNAMIC DROPDOWNS (height: 0.5cm) */}
+      <div 
+        style={{ height: '0.5cm', minHeight: '0.5cm', maxHeight: '0.5cm' }}
+        className="bg-white border-b border-neutral-300 shadow-2xs z-30 select-none flex items-center justify-between px-2 gap-1 text-[10px] overflow-x-auto overflow-y-hidden leading-none"
+      >
         {/* Left Side: Dynamic Menu Dropdowns */}
-        <div className="flex items-center gap-1">
+        <div className="flex items-center gap-0.5 shrink-0">
           {/* Dynamic Dropdown: ملف (File) */}
           <div className="relative dynamic-excel-dropdown">
             <button
               onClick={() => setActiveDropdown(activeDropdown === 'file' ? null : 'file')}
-              className={`flex items-center gap-1 px-2.5 py-1 rounded-md font-bold transition-colors ${
+              className={`flex items-center gap-0.5 px-1.5 py-0 h-4 rounded font-bold transition-colors leading-none ${
                 activeDropdown === 'file' ? 'bg-emerald-100 text-emerald-800' : 'hover:bg-neutral-100 text-neutral-800'
               }`}
             >
-              <FileSpreadsheet className="w-3.5 h-3.5 text-emerald-700" />
+              <FileSpreadsheet className="w-2.5 h-2.5 text-emerald-700" />
               <span>ملف</span>
-              <ChevronDown className="w-3 h-3 text-neutral-400" />
+              <ChevronDown className="w-2 h-2 text-neutral-400" />
             </button>
 
             {activeDropdown === 'file' && (
-              <div className="absolute right-0 top-full mt-1 bg-white border border-neutral-300 rounded-xl shadow-xl py-1.5 w-52 z-50 text-right">
+              <div className="absolute right-0 top-full mt-1 bg-white border border-neutral-300 rounded-xl shadow-xl py-1.5 w-52 z-50 text-right text-xs">
                 <button
                   onClick={() => {
                     onOpenTemplates();
@@ -391,17 +394,17 @@ export const ExcelEditor: React.FC<ExcelEditorProps> = ({
           <div className="relative dynamic-excel-dropdown">
             <button
               onClick={() => setActiveDropdown(activeDropdown === 'format' ? null : 'format')}
-              className={`flex items-center gap-1 px-2.5 py-1 rounded-md font-bold transition-colors ${
+              className={`flex items-center gap-0.5 px-1.5 py-0 h-4 rounded font-bold transition-colors leading-none ${
                 activeDropdown === 'format' ? 'bg-emerald-100 text-emerald-800' : 'hover:bg-neutral-100 text-neutral-800'
               }`}
             >
-              <Palette className="w-3.5 h-3.5 text-neutral-700" />
+              <Palette className="w-2.5 h-2.5 text-neutral-700" />
               <span>تنسيق</span>
-              <ChevronDown className="w-3 h-3 text-neutral-400" />
+              <ChevronDown className="w-2 h-2 text-neutral-400" />
             </button>
 
             {activeDropdown === 'format' && (
-              <div className="absolute right-0 top-full mt-1 bg-white border border-neutral-300 rounded-xl shadow-xl p-3 w-64 z-50 text-right space-y-2.5">
+              <div className="absolute right-0 top-full mt-1 bg-white border border-neutral-300 rounded-xl shadow-xl p-3 w-64 z-50 text-right space-y-2.5 text-xs">
                 <div>
                   <span className="text-[11px] font-bold text-neutral-500 block mb-1">نوع البيانات والأرقام:</span>
                   <div className="grid grid-cols-2 gap-1 text-xs">
@@ -468,17 +471,17 @@ export const ExcelEditor: React.FC<ExcelEditorProps> = ({
           <div className="relative dynamic-excel-dropdown">
             <button
               onClick={() => setActiveDropdown(activeDropdown === 'freeze' ? null : 'freeze')}
-              className={`flex items-center gap-1 px-2.5 py-1 rounded-md font-bold transition-colors ${
+              className={`flex items-center gap-0.5 px-1.5 py-0 h-4 rounded font-bold transition-colors leading-none ${
                 freezeTopRow || freezeFirstCol ? 'bg-cyan-100 text-cyan-900 border border-cyan-300' : 'hover:bg-neutral-100 text-neutral-800'
               }`}
             >
-              <Lock className="w-3.5 h-3.5 text-cyan-700" />
+              <Lock className="w-2.5 h-2.5 text-cyan-700" />
               <span>تجميد الألواح</span>
-              <ChevronDown className="w-3 h-3 text-neutral-400" />
+              <ChevronDown className="w-2 h-2 text-neutral-400" />
             </button>
 
             {activeDropdown === 'freeze' && (
-              <div className="absolute right-0 top-full mt-1 bg-white border border-neutral-300 rounded-xl shadow-xl py-1.5 w-64 z-50 text-right">
+              <div className="absolute right-0 top-full mt-1 bg-white border border-neutral-300 rounded-xl shadow-xl py-1.5 w-64 z-50 text-right text-xs">
                 <button
                   onClick={() => {
                     setFreezeTopRow(!freezeTopRow);
@@ -543,13 +546,13 @@ export const ExcelEditor: React.FC<ExcelEditorProps> = ({
           <div className="relative dynamic-excel-dropdown">
             <button
               onClick={() => setActiveDropdown(activeDropdown === 'formulas' ? null : 'formulas')}
-              className={`flex items-center gap-1 px-2.5 py-1 rounded-md font-bold transition-colors ${
+              className={`flex items-center gap-0.5 px-1.5 py-0 h-4 rounded font-bold transition-colors leading-none ${
                 activeDropdown === 'formulas' ? 'bg-blue-100 text-blue-800' : 'hover:bg-neutral-100 text-neutral-800'
               }`}
             >
-              <Sigma className="w-3.5 h-3.5 text-blue-700" />
+              <Sigma className="w-2.5 h-2.5 text-blue-700" />
               <span>دوال</span>
-              <ChevronDown className="w-3 h-3 text-neutral-400" />
+              <ChevronDown className="w-2 h-2 text-neutral-400" />
             </button>
 
             {activeDropdown === 'formulas' && (
@@ -606,36 +609,36 @@ export const ExcelEditor: React.FC<ExcelEditorProps> = ({
           </div>
         </div>
 
-        {/* Center: 1CM FAST ACTION BUTTONS */}
-        <div className="flex items-center gap-1 overflow-x-auto py-0.5">
+        {/* Center: 0.5CM FAST ACTION BUTTONS */}
+        <div className="flex items-center gap-0.5 overflow-x-auto">
           {/* Bold, Italic, Underline */}
-          <div className="flex items-center bg-neutral-100 rounded border border-neutral-300 p-0.5">
+          <div className="flex items-center bg-neutral-100 rounded border border-neutral-300 p-0.5 h-4">
             <button
               onClick={() => updateSelectedCellStyle({ bold: !selectedCell?.style?.bold })}
-              className={`p-1 rounded transition-colors ${
+              className={`p-0.5 rounded transition-colors h-3 w-3 flex items-center justify-center ${
                 selectedCell?.style?.bold ? 'bg-emerald-600 text-white font-bold' : 'text-neutral-800 hover:bg-white'
               }`}
               title="عريض (Ctrl+B)"
             >
-              <Bold className="w-3.5 h-3.5" />
+              <Bold className="w-2.5 h-2.5" />
             </button>
             <button
               onClick={() => updateSelectedCellStyle({ italic: !selectedCell?.style?.italic })}
-              className={`p-1 rounded transition-colors ${
+              className={`p-0.5 rounded transition-colors h-3 w-3 flex items-center justify-center ${
                 selectedCell?.style?.italic ? 'bg-emerald-600 text-white' : 'text-neutral-800 hover:bg-white'
               }`}
               title="مائل (Ctrl+I)"
             >
-              <Italic className="w-3.5 h-3.5" />
+              <Italic className="w-2.5 h-2.5" />
             </button>
             <button
               onClick={() => updateSelectedCellStyle({ underline: !selectedCell?.style?.underline })}
-              className={`p-1 rounded transition-colors ${
+              className={`p-0.5 rounded transition-colors h-3 w-3 flex items-center justify-center ${
                 selectedCell?.style?.underline ? 'bg-emerald-600 text-white' : 'text-neutral-800 hover:bg-white'
               }`}
               title="تسطير (Ctrl+U)"
             >
-              <Underline className="w-3.5 h-3.5" />
+              <Underline className="w-2.5 h-2.5" />
             </button>
           </div>
 
@@ -646,13 +649,13 @@ export const ExcelEditor: React.FC<ExcelEditorProps> = ({
                 setShowFillColorPicker(!showFillColorPicker);
                 setShowTextColorPicker(false);
               }}
-              className="h-7 px-1.5 flex items-center gap-1 hover:bg-neutral-100 rounded border border-neutral-300 text-neutral-700"
+              className="h-4 px-1 flex items-center gap-0.5 hover:bg-neutral-100 rounded border border-neutral-300 text-neutral-700 leading-none"
               title="لون تعبئة الخلية"
             >
-              <Palette className="w-3.5 h-3.5 text-emerald-600" />
+              <Palette className="w-2.5 h-2.5 text-emerald-600" />
             </button>
             {showFillColorPicker && (
-              <div className="absolute top-full mt-1 bg-white border border-neutral-300 rounded-lg shadow-xl p-2.5 z-50 w-48">
+              <div className="absolute top-full mt-1 bg-white border border-neutral-300 rounded-lg shadow-xl p-2 z-50 w-48 text-xs">
                 <span className="text-[10px] font-bold text-neutral-500 block mb-1.5">لون التعبئة:</span>
                 <div className="grid grid-cols-5 gap-1.5">
                   {colorPalette.map((c) => (
@@ -663,7 +666,7 @@ export const ExcelEditor: React.FC<ExcelEditorProps> = ({
                         setShowFillColorPicker(false);
                       }}
                       style={{ backgroundColor: c }}
-                      className="w-6 h-6 rounded-sm border border-neutral-300 hover:scale-110 transition-transform"
+                      className="w-5 h-5 rounded-xs border border-neutral-300 hover:scale-110 transition-transform"
                     />
                   ))}
                 </div>
@@ -677,13 +680,13 @@ export const ExcelEditor: React.FC<ExcelEditorProps> = ({
                 setShowTextColorPicker(!showTextColorPicker);
                 setShowFillColorPicker(false);
               }}
-              className="h-7 px-1.5 flex items-center gap-1 hover:bg-neutral-100 rounded border border-neutral-300 text-neutral-700 font-bold"
+              className="h-4 px-1 flex items-center gap-0.5 hover:bg-neutral-100 rounded border border-neutral-300 text-neutral-700 font-bold leading-none"
               title="لون خط الخلية"
             >
-              <span className="underline decoration-blue-600 decoration-2 text-xs">A</span>
+              <span className="underline decoration-blue-600 decoration-2 text-[10px]">A</span>
             </button>
             {showTextColorPicker && (
-              <div className="absolute top-full mt-1 bg-white border border-neutral-300 rounded-lg shadow-xl p-2.5 z-50 w-48">
+              <div className="absolute top-full mt-1 bg-white border border-neutral-300 rounded-lg shadow-xl p-2 z-50 w-48 text-xs">
                 <span className="text-[10px] font-bold text-neutral-500 block mb-1.5">لون النص:</span>
                 <div className="grid grid-cols-4 gap-1.5">
                   {textColorPalette.map((c) => (
@@ -694,7 +697,7 @@ export const ExcelEditor: React.FC<ExcelEditorProps> = ({
                         setShowTextColorPicker(false);
                       }}
                       style={{ backgroundColor: c }}
-                      className="w-6 h-6 rounded-sm border border-neutral-300 hover:scale-110 transition-transform"
+                      className="w-5 h-5 rounded-xs border border-neutral-300 hover:scale-110 transition-transform"
                     />
                   ))}
                 </div>
@@ -702,81 +705,81 @@ export const ExcelEditor: React.FC<ExcelEditorProps> = ({
             )}
           </div>
 
-          <div className="h-4 w-px bg-neutral-300 mx-0.5" />
+          <div className="h-3 w-px bg-neutral-300 mx-0.5" />
 
           {/* Quick Alignments */}
-          <div className="flex items-center bg-neutral-100 rounded border border-neutral-300 p-0.5">
+          <div className="flex items-center bg-neutral-100 rounded border border-neutral-300 p-0.5 h-4">
             <button
               onClick={() => updateSelectedCellStyle({ align: 'right' })}
-              className={`p-1 rounded transition-colors ${
+              className={`p-0.5 rounded transition-colors h-3 w-3 flex items-center justify-center ${
                 (selectedCell?.style?.align || 'right') === 'right' ? 'bg-white text-neutral-900 font-bold' : 'text-neutral-600'
               }`}
               title="محاذاة لليمين"
             >
-              <AlignRight className="w-3.5 h-3.5" />
+              <AlignRight className="w-2.5 h-2.5" />
             </button>
             <button
               onClick={() => updateSelectedCellStyle({ align: 'center' })}
-              className={`p-1 rounded transition-colors ${
+              className={`p-0.5 rounded transition-colors h-3 w-3 flex items-center justify-center ${
                 selectedCell?.style?.align === 'center' ? 'bg-white text-neutral-900 font-bold' : 'text-neutral-600'
               }`}
               title="توسيط"
             >
-              <AlignCenter className="w-3.5 h-3.5" />
+              <AlignCenter className="w-2.5 h-2.5" />
             </button>
             <button
               onClick={() => updateSelectedCellStyle({ align: 'left' })}
-              className={`p-1 rounded transition-colors ${
+              className={`p-0.5 rounded transition-colors h-3 w-3 flex items-center justify-center ${
                 selectedCell?.style?.align === 'left' ? 'bg-white text-neutral-900 font-bold' : 'text-neutral-600'
               }`}
               title="محاذاة لليسار"
             >
-              <AlignLeft className="w-3.5 h-3.5" />
+              <AlignLeft className="w-2.5 h-2.5" />
             </button>
           </div>
 
-          <div className="h-4 w-px bg-neutral-300 mx-0.5" />
+          <div className="h-3 w-px bg-neutral-300 mx-0.5" />
 
           {/* Fast Number Formats */}
           <button
             onClick={() => updateSelectedCellStyle({ format: 'currency' })}
-            className="h-7 px-2 hover:bg-neutral-100 rounded border border-neutral-300 flex items-center gap-1 font-bold text-neutral-700"
+            className="h-4 px-1.5 hover:bg-neutral-100 rounded border border-neutral-300 flex items-center gap-0.5 font-bold text-neutral-700 leading-none"
             title="تنسيق العملة ر.س"
           >
-            <Coins className="w-3.5 h-3.5 text-amber-600" />
-            <span className="text-[11px]">ر.س</span>
+            <Coins className="w-2.5 h-2.5 text-amber-600" />
+            <span className="text-[9px]">ر.س</span>
           </button>
 
           <button
             onClick={() => updateSelectedCellStyle({ format: 'percentage' })}
-            className="h-7 px-2 hover:bg-neutral-100 rounded border border-neutral-300 flex items-center gap-1 font-bold text-neutral-700"
+            className="h-4 px-1.5 hover:bg-neutral-100 rounded border border-neutral-300 flex items-center gap-0.5 font-bold text-neutral-700 leading-none"
             title="تنسيق النسبة المئوية %"
           >
-            <Percent className="w-3.5 h-3.5 text-blue-600" />
+            <Percent className="w-2.5 h-2.5 text-blue-600" />
           </button>
 
-          <div className="h-4 w-px bg-neutral-300 mx-0.5" />
+          <div className="h-3 w-px bg-neutral-300 mx-0.5" />
 
           {/* Freeze Panes Quick Toggle */}
           <button
             onClick={() => setFreezeTopRow(!freezeTopRow)}
-            className={`h-7 px-2 rounded border flex items-center gap-1 font-semibold transition-colors ${
+            className={`h-4 px-1.5 rounded border flex items-center gap-0.5 font-semibold transition-colors leading-none ${
               freezeTopRow ? 'bg-cyan-50 border-cyan-300 text-cyan-800 font-bold' : 'border-neutral-300 text-neutral-700 hover:bg-neutral-100'
             }`}
             title="تجميد/إلغاء تجميد الصف العلوي ليبقى ثابتاً أثناء التمرير"
           >
-            <Lock className="w-3.5 h-3.5 text-cyan-600" />
-            <span className="text-[11px]">تجميد صف 1</span>
+            <Lock className="w-2.5 h-2.5 text-cyan-600" />
+            <span className="text-[9px]">تجميد صف 1</span>
           </button>
 
           {/* Chart Modal Trigger */}
           <button
             onClick={() => setShowChartModal(true)}
-            className="h-7 px-2.5 bg-emerald-600 hover:bg-emerald-700 text-white rounded border border-emerald-700 flex items-center gap-1 font-bold shadow-xs cursor-pointer"
+            className="h-4 px-1.5 bg-emerald-600 hover:bg-emerald-700 text-white rounded border border-emerald-700 flex items-center gap-0.5 font-bold shadow-2xs cursor-pointer leading-none"
             title="إنشاء مخطط ورسم بياني (Recharts)"
           >
-            <BarChart2 className="w-3.5 h-3.5" />
-            <span className="text-[11px]">مخطط بياني</span>
+            <BarChart2 className="w-2.5 h-2.5" />
+            <span className="text-[9px]">مخطط بياني</span>
           </button>
         </div>
 
@@ -785,24 +788,24 @@ export const ExcelEditor: React.FC<ExcelEditorProps> = ({
           {onToggleKeyboard && (
             <button
               onClick={onToggleKeyboard}
-              className={`h-7 px-2.5 rounded-md border flex items-center gap-1.5 font-bold transition-all ${
+              className={`h-4 px-1.5 rounded border flex items-center gap-1 font-bold transition-all leading-none ${
                 isKeyboardOpen
-                  ? 'bg-cyan-600 text-white border-cyan-700 shadow-xs'
+                  ? 'bg-cyan-600 text-white border-cyan-700 shadow-2xs'
                   : 'bg-neutral-100 hover:bg-neutral-200 text-neutral-800 border-neutral-300'
               }`}
               title="تشغيل / إخفاء الكيبورد العربي الملحق"
             >
-              <KeyboardIcon className="w-3.5 h-3.5" />
-              <span className="text-[11px]">كيبورد ملحق</span>
+              <KeyboardIcon className="w-2.5 h-2.5" />
+              <span className="text-[9px]">كيبورد</span>
             </button>
           )}
 
           <button
             onClick={() => updateCell(selectedCellId, { value: '' })}
-            className="p-1.5 text-neutral-400 hover:text-red-600 hover:bg-red-50 rounded border border-neutral-200"
+            className="p-0.5 text-neutral-400 hover:text-red-600 hover:bg-red-50 rounded border border-neutral-200 h-4 w-4 flex items-center justify-center"
             title="مسح الخلية المحددة"
           >
-            <Trash2 className="w-3.5 h-3.5" />
+            <Trash2 className="w-2.5 h-2.5" />
           </button>
         </div>
       </div>
@@ -984,19 +987,22 @@ export const ExcelEditor: React.FC<ExcelEditorProps> = ({
         </div>
       </div>
 
-      {/* Sheets Navigation & Status Bar */}
-      <div className="bg-white border-t border-neutral-300 px-4 py-1.5 flex items-center justify-between text-xs text-neutral-700 select-none z-20">
+      {/* Sheets Navigation & Status Bar (Exact 0.5cm height) */}
+      <div 
+        style={{ height: '0.5cm', minHeight: '0.5cm', maxHeight: '0.5cm' }}
+        className="bg-white border-t border-neutral-300 px-2 py-0 flex items-center justify-between text-[10px] text-neutral-700 select-none z-20 overflow-hidden leading-none"
+      >
         {/* Left: Sheets Tabs */}
-        <div className="flex items-center gap-1 overflow-x-auto">
+        <div className="flex items-center gap-0.5 overflow-x-auto">
           <button
             onClick={handleAddSheet}
-            className="p-1 hover:bg-neutral-100 rounded text-neutral-600"
+            className="p-0.5 hover:bg-neutral-100 rounded text-neutral-600 h-3.5 w-3.5 flex items-center justify-center"
             title="إضافة ورقة عمل جديدة"
           >
-            <Plus className="w-3.5 h-3.5" />
+            <Plus className="w-2.5 h-2.5" />
           </button>
 
-          <div className="flex items-center gap-1">
+          <div className="flex items-center gap-0.5">
             {workbook.sheets.map((sheet) => {
               const isActive = sheet.id === activeSheet.id;
               return (
@@ -1004,7 +1010,7 @@ export const ExcelEditor: React.FC<ExcelEditorProps> = ({
                   key={sheet.id}
                   onClick={() => handleSwitchSheet(sheet.id)}
                   onDoubleClick={() => handleRenameSheet(sheet.id)}
-                  className={`flex items-center gap-1.5 px-3 py-1 rounded-t border-t border-x cursor-pointer text-xs transition-colors ${
+                  className={`flex items-center gap-1 px-2 py-0 h-3.5 rounded-t border-t border-x cursor-pointer text-[9px] transition-colors leading-none ${
                     isActive
                       ? 'bg-neutral-100 border-neutral-300 text-emerald-800 font-bold border-b-2 border-b-emerald-600'
                       : 'bg-white border-transparent text-neutral-600 hover:bg-neutral-50'
@@ -1014,9 +1020,9 @@ export const ExcelEditor: React.FC<ExcelEditorProps> = ({
                   {workbook.sheets.length > 1 && (
                     <button
                       onClick={(e) => handleDeleteSheet(sheet.id, e)}
-                      className="p-0.5 hover:text-red-600 rounded"
+                      className="p-0 hover:text-red-600 rounded"
                     >
-                      <Trash2 className="w-3 h-3" />
+                      <Trash2 className="w-2.5 h-2.5" />
                     </button>
                   )}
                 </div>
@@ -1026,14 +1032,14 @@ export const ExcelEditor: React.FC<ExcelEditorProps> = ({
         </div>
 
         {/* Right: Summary Statistics & Quick Freeze indicators */}
-        <div className="flex items-center gap-4 text-[11px] text-neutral-500 font-medium">
+        <div className="flex items-center gap-2 text-[9px] text-neutral-500 font-medium">
           {freezeTopRow && (
-            <span className="flex items-center gap-1 text-cyan-800 bg-cyan-50 px-2 py-0.5 rounded border border-cyan-200">
-              <Lock className="w-3 h-3" />
-              <span>صف 1 مجمد</span>
+            <span className="flex items-center gap-0.5 text-cyan-800 bg-cyan-50 px-1 py-0 rounded border border-cyan-200">
+              <Lock className="w-2.5 h-2.5" />
+              <span>صف 1</span>
             </span>
           )}
-          <span>خلايا ممتلئة: <strong className="font-mono text-neutral-800">{summaryStats.count}</strong></span>
+          <span>خلايا: <strong className="font-mono text-neutral-800">{summaryStats.count}</strong></span>
           <span>المجموع: <strong className="font-mono text-neutral-800">{summaryStats.sum.toLocaleString('ar-SA')}</strong></span>
         </div>
       </div>

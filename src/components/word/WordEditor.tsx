@@ -457,7 +457,7 @@ export const WordEditor: React.FC<WordEditorProps> = ({
   ];
 
   return (
-    <div className="flex flex-col h-[calc(100vh-48px)] bg-neutral-200/70 overflow-hidden font-sans">
+    <div className="flex flex-col h-full bg-neutral-200/70 overflow-hidden font-sans">
       {/* Hidden File Input for Image Insertion */}
       <input
         type="file"
@@ -467,21 +467,24 @@ export const WordEditor: React.FC<WordEditorProps> = ({
         className="hidden"
       />
 
-      {/* COMPACT 1CM FORMATTING TOOLBAR WITH DYNAMIC DROPDOWNS (height: 38px / 1cm) */}
-      <div className="bg-white border-b border-neutral-300 shadow-xs z-30 select-none h-[38px] min-h-[38px] flex items-center justify-between px-2 gap-2 text-xs">
+      {/* COMPACT 0.5CM FORMATTING TOOLBAR WITH DYNAMIC DROPDOWNS (height: 0.5cm) */}
+      <div 
+        style={{ height: '0.5cm', minHeight: '0.5cm', maxHeight: '0.5cm' }}
+        className="bg-white border-b border-neutral-300 shadow-2xs z-30 select-none flex items-center justify-between px-2 gap-1 text-[10px] overflow-x-auto overflow-y-hidden leading-none"
+      >
         {/* Left Side: Dynamic Menu Dropdowns */}
-        <div className="flex items-center gap-1">
+        <div className="flex items-center gap-0.5 shrink-0">
           {/* Dynamic Dropdown: ملف (File) */}
           <div className="relative dynamic-dropdown-container">
             <button
               onClick={() => setActiveDropdown(activeDropdown === 'file' ? null : 'file')}
-              className={`flex items-center gap-1 px-2.5 py-1 rounded-md font-bold transition-colors ${
+              className={`flex items-center gap-0.5 px-1.5 py-0 h-4 rounded font-bold transition-colors leading-none ${
                 activeDropdown === 'file' ? 'bg-blue-100 text-blue-800' : 'hover:bg-neutral-100 text-neutral-800'
               }`}
             >
-              <FileText className="w-3.5 h-3.5 text-blue-700" />
+              <FileText className="w-2.5 h-2.5 text-blue-700" />
               <span>ملف</span>
-              <ChevronDown className="w-3 h-3 text-neutral-400" />
+              <ChevronDown className="w-2 h-2 text-neutral-400" />
             </button>
 
             {activeDropdown === 'file' && (
@@ -491,7 +494,7 @@ export const WordEditor: React.FC<WordEditorProps> = ({
                     onOpenTemplates();
                     setActiveDropdown(null);
                   }}
-                  className="w-full px-3 py-1.5 hover:bg-neutral-100 text-neutral-800 font-semibold flex items-center justify-between"
+                  className="w-full px-3 py-1.5 hover:bg-neutral-100 text-neutral-800 font-semibold flex items-center justify-between text-xs"
                 >
                   <span>نماذج وورد الجاهزة</span>
                   <Sparkles className="w-3.5 h-3.5 text-amber-500" />
@@ -501,7 +504,7 @@ export const WordEditor: React.FC<WordEditorProps> = ({
                     window.print();
                     setActiveDropdown(null);
                   }}
-                  className="w-full px-3 py-1.5 hover:bg-neutral-100 text-neutral-700 flex items-center justify-between"
+                  className="w-full px-3 py-1.5 hover:bg-neutral-100 text-neutral-700 flex items-center justify-between text-xs"
                 >
                   <span>طباعة / حفظ PDF</span>
                   <span className="text-[10px] text-neutral-400 font-mono">Ctrl+P</span>
@@ -514,13 +517,13 @@ export const WordEditor: React.FC<WordEditorProps> = ({
           <div className="relative dynamic-dropdown-container">
             <button
               onClick={() => setActiveDropdown(activeDropdown === 'font' ? null : 'font')}
-              className={`flex items-center gap-1 px-2.5 py-1 rounded-md font-bold transition-colors ${
+              className={`flex items-center gap-0.5 px-1.5 py-0 h-4 rounded font-bold transition-colors leading-none ${
                 activeDropdown === 'font' ? 'bg-blue-100 text-blue-800' : 'hover:bg-neutral-100 text-neutral-800'
               }`}
             >
-              <Type className="w-3.5 h-3.5 text-neutral-700" />
+              <Type className="w-2.5 h-2.5 text-neutral-700" />
               <span>الخطوط</span>
-              <ChevronDown className="w-3 h-3 text-neutral-400" />
+              <ChevronDown className="w-2 h-2 text-neutral-400" />
             </button>
 
             {activeDropdown === 'font' && (
@@ -552,17 +555,17 @@ export const WordEditor: React.FC<WordEditorProps> = ({
           <div className="relative dynamic-dropdown-container">
             <button
               onClick={() => setActiveDropdown(activeDropdown === 'insert' ? null : 'insert')}
-              className={`flex items-center gap-1 px-2.5 py-1 rounded-md font-bold transition-colors ${
+              className={`flex items-center gap-0.5 px-1.5 py-0 h-4 rounded font-bold transition-colors leading-none ${
                 activeDropdown === 'insert' ? 'bg-emerald-100 text-emerald-800' : 'hover:bg-neutral-100 text-neutral-800'
               }`}
             >
-              <Plus className="w-3.5 h-3.5 text-emerald-700" />
+              <Plus className="w-2.5 h-2.5 text-emerald-700" />
               <span>إدراج</span>
-              <ChevronDown className="w-3 h-3 text-neutral-400" />
+              <ChevronDown className="w-2 h-2 text-neutral-400" />
             </button>
 
             {activeDropdown === 'insert' && (
-              <div className="absolute right-0 top-full mt-1 bg-white border border-neutral-300 rounded-xl shadow-xl py-1.5 w-64 z-50 text-right">
+              <div className="absolute right-0 top-full mt-1 bg-white border border-neutral-300 rounded-xl shadow-xl py-1.5 w-64 z-50 text-right text-xs">
                 <button
                   onClick={() => {
                     saveSelection();
@@ -641,22 +644,22 @@ export const WordEditor: React.FC<WordEditorProps> = ({
           <div className="relative dynamic-dropdown-container">
             <button
               onClick={() => setActiveDropdown(activeDropdown === 'review' ? null : 'review')}
-              className={`flex items-center gap-1 px-2.5 py-1 rounded-md font-bold transition-colors ${
+              className={`flex items-center gap-0.5 px-1.5 py-0 h-4 rounded font-bold transition-colors leading-none ${
                 activeDropdown === 'review' ? 'bg-rose-100 text-rose-800' : 'hover:bg-neutral-100 text-neutral-800'
               }`}
             >
-              <CheckCircle2 className="w-3.5 h-3.5 text-rose-600" />
+              <CheckCircle2 className="w-2.5 h-2.5 text-rose-600" />
               <span>التدقيق</span>
               {spellIssues.length > 0 && (
-                <span className="w-4 h-4 bg-rose-600 text-white rounded-full text-[10px] flex items-center justify-center font-mono">
+                <span className="w-3.5 h-3.5 bg-rose-600 text-white rounded-full text-[9px] flex items-center justify-center font-mono">
                   {spellIssues.length}
                 </span>
               )}
-              <ChevronDown className="w-3 h-3 text-neutral-400" />
+              <ChevronDown className="w-2 h-2 text-neutral-400" />
             </button>
 
             {activeDropdown === 'review' && (
-              <div className="absolute right-0 top-full mt-1 bg-white border border-neutral-300 rounded-xl shadow-xl py-1.5 w-60 z-50 text-right">
+              <div className="absolute right-0 top-full mt-1 bg-white border border-neutral-300 rounded-xl shadow-xl py-1.5 w-60 z-50 text-right text-xs">
                 <button
                   onClick={() => {
                     setShowSpellModal(true);
@@ -692,47 +695,47 @@ export const WordEditor: React.FC<WordEditorProps> = ({
           </div>
         </div>
 
-        {/* Center/Quick-Action Bar: 1cm Fast Buttons */}
-        <div className="flex items-center gap-1 overflow-x-auto py-0.5">
+        {/* Center/Quick-Action Bar: 0.5cm Fast Buttons */}
+        <div className="flex items-center gap-0.5 overflow-x-auto">
           {/* Headings Quick Select */}
-          <div className="flex items-center bg-neutral-100 rounded border border-neutral-300 p-0.5">
+          <div className="flex items-center bg-neutral-100 rounded border border-neutral-300 p-0.5 h-4">
             <button
               onClick={() => applyHeading('p')}
-              className="px-1.5 py-0.5 hover:bg-white rounded text-[11px] font-medium text-neutral-700"
+              className="px-1 py-0 hover:bg-white rounded text-[9px] font-medium text-neutral-700 leading-none h-3"
               title="نص عادي"
             >
               نص
             </button>
             <button
               onClick={() => applyHeading('h1')}
-              className="px-1.5 py-0.5 hover:bg-white rounded text-[11px] font-bold text-neutral-900"
+              className="px-1 py-0 hover:bg-white rounded text-[9px] font-bold text-neutral-900 leading-none h-3"
               title="عنوان رئيسي 1"
             >
               ع1
             </button>
             <button
               onClick={() => applyHeading('h2')}
-              className="px-1.5 py-0.5 hover:bg-white rounded text-[11px] font-bold text-neutral-800"
+              className="px-1 py-0 hover:bg-white rounded text-[9px] font-bold text-neutral-800 leading-none h-3"
               title="عنوان فرعي 2"
             >
               ع2
             </button>
             <button
               onClick={() => applyHeading('h3')}
-              className="px-1.5 py-0.5 hover:bg-white rounded text-[11px] font-semibold text-neutral-700"
+              className="px-1 py-0 hover:bg-white rounded text-[9px] font-semibold text-neutral-700 leading-none h-3"
               title="عنوان 3"
             >
               ع3
             </button>
           </div>
 
-          <div className="h-4 w-px bg-neutral-300 mx-0.5" />
+          <div className="h-3 w-px bg-neutral-300 mx-0.5" />
 
-          {/* Font Selector in 1cm bar */}
+          {/* Font Selector in 0.5cm bar */}
           <select
             value={fontFamily}
             onChange={(e) => handleFontFamilyChange(e.target.value)}
-            className="h-7 bg-neutral-50 hover:bg-white border border-neutral-300 rounded px-1.5 text-xs font-semibold text-neutral-800 focus:outline-hidden cursor-pointer max-w-[120px]"
+            className="h-4 bg-neutral-50 hover:bg-white border border-neutral-300 rounded px-1 text-[10px] font-semibold text-neutral-800 focus:outline-hidden cursor-pointer max-w-[100px] leading-none py-0"
             title="نوع الخط العربي"
           >
             {ARABIC_FONTS.map(f => (
@@ -744,7 +747,7 @@ export const WordEditor: React.FC<WordEditorProps> = ({
           <select
             value={fontSize}
             onChange={(e) => handleFontSizeChange(e.target.value)}
-            className="h-7 bg-neutral-50 hover:bg-white border border-neutral-300 rounded px-1 text-xs font-mono font-bold text-neutral-800 focus:outline-hidden cursor-pointer"
+            className="h-4 bg-neutral-50 hover:bg-white border border-neutral-300 rounded px-0.5 text-[10px] font-mono font-bold text-neutral-800 focus:outline-hidden cursor-pointer leading-none py-0"
             title="حجم الخط"
           >
             {['10', '11', '12', '14', '16', '18', '20', '24', '28', '32', '36', '48'].map((sz) => (
@@ -752,30 +755,30 @@ export const WordEditor: React.FC<WordEditorProps> = ({
             ))}
           </select>
 
-          <div className="h-4 w-px bg-neutral-300 mx-0.5" />
+          <div className="h-3 w-px bg-neutral-300 mx-0.5" />
 
           {/* Bold, Italic, Underline */}
-          <div className="flex items-center bg-neutral-100 rounded border border-neutral-300 p-0.5">
+          <div className="flex items-center bg-neutral-100 rounded border border-neutral-300 p-0.5 h-4">
             <button
               onClick={() => execCmd('bold')}
-              className="p-1 hover:bg-white rounded transition-colors text-neutral-800 font-bold"
+              className="p-0.5 hover:bg-white rounded transition-colors text-neutral-800 font-bold h-3 w-3 flex items-center justify-center"
               title="عريض (Ctrl+B)"
             >
-              <Bold className="w-3.5 h-3.5" />
+              <Bold className="w-2.5 h-2.5" />
             </button>
             <button
               onClick={() => execCmd('italic')}
-              className="p-1 hover:bg-white rounded transition-colors text-neutral-800"
+              className="p-0.5 hover:bg-white rounded transition-colors text-neutral-800 h-3 w-3 flex items-center justify-center"
               title="مائل (Ctrl+I)"
             >
-              <Italic className="w-3.5 h-3.5" />
+              <Italic className="w-2.5 h-2.5" />
             </button>
             <button
               onClick={() => execCmd('underline')}
-              className="p-1 hover:bg-white rounded transition-colors text-neutral-800"
+              className="p-0.5 hover:bg-white rounded transition-colors text-neutral-800 h-3 w-3 flex items-center justify-center"
               title="تسطير (Ctrl+U)"
             >
-              <Underline className="w-3.5 h-3.5" />
+              <Underline className="w-2.5 h-2.5" />
             </button>
           </div>
 
@@ -786,13 +789,13 @@ export const WordEditor: React.FC<WordEditorProps> = ({
                 setShowColorPicker(!showColorPicker);
                 setShowHighlightPicker(false);
               }}
-              className="h-7 px-1.5 flex items-center gap-1 hover:bg-neutral-100 rounded border border-neutral-300 text-neutral-700"
+              className="h-4 px-1 flex items-center gap-0.5 hover:bg-neutral-100 rounded border border-neutral-300 text-neutral-700 leading-none"
               title="لون النص"
             >
-              <span className="font-bold underline decoration-red-600 decoration-2 text-xs">A</span>
+              <span className="font-bold underline decoration-red-600 decoration-2 text-[10px]">A</span>
             </button>
             {showColorPicker && (
-              <div className="absolute top-full mt-1 bg-white border border-neutral-300 rounded-lg shadow-xl p-2.5 z-50 w-48">
+              <div className="absolute top-full mt-1 bg-white border border-neutral-300 rounded-lg shadow-xl p-2 z-50 w-48 text-xs">
                 <span className="text-[10px] font-bold text-neutral-500 block mb-1.5">لون النص:</span>
                 <div className="grid grid-cols-5 gap-1.5 mb-2">
                   {colorPalette.map((c) => (
@@ -800,7 +803,7 @@ export const WordEditor: React.FC<WordEditorProps> = ({
                       key={c}
                       onClick={() => applyTextColor(c)}
                       style={{ backgroundColor: c }}
-                      className="w-6 h-6 rounded-sm border border-neutral-300 hover:scale-110 transition-transform"
+                      className="w-5 h-5 rounded-xs border border-neutral-300 hover:scale-110 transition-transform"
                     />
                   ))}
                 </div>
@@ -814,13 +817,13 @@ export const WordEditor: React.FC<WordEditorProps> = ({
                 setShowHighlightPicker(!showHighlightPicker);
                 setShowColorPicker(false);
               }}
-              className="h-7 px-1.5 flex items-center gap-1 hover:bg-neutral-100 rounded border border-neutral-300 text-neutral-700"
+              className="h-4 px-1 flex items-center gap-0.5 hover:bg-neutral-100 rounded border border-neutral-300 text-neutral-700 leading-none"
               title="تمييز خلفية النص (Highlighter)"
             >
-              <Highlighter className="w-3.5 h-3.5 text-amber-500" />
+              <Highlighter className="w-2.5 h-2.5 text-amber-500" />
             </button>
             {showHighlightPicker && (
-              <div className="absolute top-full mt-1 bg-white border border-neutral-300 rounded-lg shadow-xl p-2.5 z-50 w-48">
+              <div className="absolute top-full mt-1 bg-white border border-neutral-300 rounded-lg shadow-xl p-2 z-50 w-48 text-xs">
                 <span className="text-[10px] font-bold text-neutral-500 block mb-1.5">تمييز النص:</span>
                 <div className="grid grid-cols-4 gap-1.5">
                   {highlightPalette.map((c) => (
@@ -828,7 +831,7 @@ export const WordEditor: React.FC<WordEditorProps> = ({
                       key={c}
                       onClick={() => applyHighlightColor(c)}
                       style={{ backgroundColor: c === 'transparent' ? '#ffffff' : c }}
-                      className="w-6 h-6 rounded-sm border border-neutral-300 hover:scale-110 transition-transform"
+                      className="w-5 h-5 rounded-xs border border-neutral-300 hover:scale-110 transition-transform"
                     />
                   ))}
                 </div>
@@ -836,59 +839,59 @@ export const WordEditor: React.FC<WordEditorProps> = ({
             )}
           </div>
 
-          <div className="h-4 w-px bg-neutral-300 mx-0.5" />
+          <div className="h-3 w-px bg-neutral-300 mx-0.5" />
 
           {/* Alignments */}
-          <div className="flex items-center bg-neutral-100 rounded border border-neutral-300 p-0.5">
+          <div className="flex items-center bg-neutral-100 rounded border border-neutral-300 p-0.5 h-4">
             <button
               onClick={() => execCmd('justifyRight')}
-              className="p-1 hover:bg-white rounded transition-colors text-neutral-700"
+              className="p-0.5 hover:bg-white rounded transition-colors text-neutral-700 h-3 w-3 flex items-center justify-center"
               title="محاذاة لليمين"
             >
-              <AlignRight className="w-3.5 h-3.5" />
+              <AlignRight className="w-2.5 h-2.5" />
             </button>
             <button
               onClick={() => execCmd('justifyCenter')}
-              className="p-1 hover:bg-white rounded transition-colors text-neutral-700"
+              className="p-0.5 hover:bg-white rounded transition-colors text-neutral-700 h-3 w-3 flex items-center justify-center"
               title="توسيط"
             >
-              <AlignCenter className="w-3.5 h-3.5" />
+              <AlignCenter className="w-2.5 h-2.5" />
             </button>
             <button
               onClick={() => execCmd('justifyLeft')}
-              className="p-1 hover:bg-white rounded transition-colors text-neutral-700"
+              className="p-0.5 hover:bg-white rounded transition-colors text-neutral-700 h-3 w-3 flex items-center justify-center"
               title="محاذاة لليسار"
             >
-              <AlignLeft className="w-3.5 h-3.5" />
+              <AlignLeft className="w-2.5 h-2.5" />
             </button>
             <button
               onClick={() => execCmd('justifyFull')}
-              className="p-1 hover:bg-white rounded transition-colors text-neutral-700"
+              className="p-0.5 hover:bg-white rounded transition-colors text-neutral-700 h-3 w-3 flex items-center justify-center"
               title="ضبط كامل (Justify)"
             >
-              <AlignJustify className="w-3.5 h-3.5" />
+              <AlignJustify className="w-2.5 h-2.5" />
             </button>
           </div>
 
           {/* Lists */}
-          <div className="flex items-center bg-neutral-100 rounded border border-neutral-300 p-0.5">
+          <div className="flex items-center bg-neutral-100 rounded border border-neutral-300 p-0.5 h-4">
             <button
               onClick={() => execCmd('insertUnorderedList')}
-              className="p-1 hover:bg-white rounded transition-colors text-neutral-700"
+              className="p-0.5 hover:bg-white rounded transition-colors text-neutral-700 h-3 w-3 flex items-center justify-center"
               title="قائمة نقطية"
             >
-              <List className="w-3.5 h-3.5" />
+              <List className="w-2.5 h-2.5" />
             </button>
             <button
               onClick={() => execCmd('insertOrderedList')}
-              className="p-1 hover:bg-white rounded transition-colors text-neutral-700"
+              className="p-0.5 hover:bg-white rounded transition-colors text-neutral-700 h-3 w-3 flex items-center justify-center"
               title="قائمة رقمية"
             >
-              <ListOrdered className="w-3.5 h-3.5" />
+              <ListOrdered className="w-2.5 h-2.5" />
             </button>
           </div>
 
-          <div className="h-4 w-px bg-neutral-300 mx-0.5" />
+          <div className="h-3 w-px bg-neutral-300 mx-0.5" />
 
           {/* Quick Insert Buttons: Table, Image, TOC */}
           <button
@@ -896,43 +899,43 @@ export const WordEditor: React.FC<WordEditorProps> = ({
               saveSelection();
               setShowTableModal(true);
             }}
-            className="h-7 px-2 hover:bg-blue-50 hover:text-blue-700 rounded border border-neutral-300 flex items-center gap-1 font-semibold text-neutral-700"
+            className="h-4 px-1.5 hover:bg-blue-50 hover:text-blue-700 rounded border border-neutral-300 flex items-center gap-0.5 font-semibold text-neutral-700 leading-none"
             title="إدراج جدول"
           >
-            <TableIcon className="w-3.5 h-3.5 text-blue-600" />
-            <span className="hidden xl:inline text-[11px]">جدول</span>
+            <TableIcon className="w-2.5 h-2.5 text-blue-600" />
+            <span className="hidden xl:inline text-[9px]">جدول</span>
           </button>
 
           <button
             onClick={triggerImagePicker}
-            className="h-7 px-2 hover:bg-emerald-50 hover:text-emerald-700 rounded border border-neutral-300 flex items-center gap-1 font-semibold text-neutral-700"
+            className="h-4 px-1.5 hover:bg-emerald-50 hover:text-emerald-700 rounded border border-neutral-300 flex items-center gap-0.5 font-semibold text-neutral-700 leading-none"
             title="إدراج صورة من جهازك"
           >
-            <ImageIcon className="w-3.5 h-3.5 text-emerald-600" />
-            <span className="hidden xl:inline text-[11px]">صورة</span>
+            <ImageIcon className="w-2.5 h-2.5 text-emerald-600" />
+            <span className="hidden xl:inline text-[9px]">صورة</span>
           </button>
 
           <button
             onClick={handleOpenTocModal}
-            className="h-7 px-2 hover:bg-purple-50 hover:text-purple-700 rounded border border-neutral-300 flex items-center gap-1 font-semibold text-neutral-700"
+            className="h-4 px-1.5 hover:bg-purple-50 hover:text-purple-700 rounded border border-neutral-300 flex items-center gap-0.5 font-semibold text-neutral-700 leading-none"
             title="إدراج فهرس المحتويات (TOC)"
           >
-            <BookOpen className="w-3.5 h-3.5 text-purple-600" />
-            <span className="hidden xl:inline text-[11px]">فهرس</span>
+            <BookOpen className="w-2.5 h-2.5 text-purple-600" />
+            <span className="hidden xl:inline text-[9px]">فهرس</span>
           </button>
 
           {/* Quick Spell Check Trigger */}
           <button
             onClick={() => setShowSpellModal(true)}
-            className={`h-7 px-2 rounded border flex items-center gap-1 font-semibold transition-colors ${
+            className={`h-4 px-1.5 rounded border flex items-center gap-0.5 font-semibold transition-colors leading-none ${
               spellIssues.length > 0
                 ? 'bg-rose-50 border-rose-300 text-rose-800'
                 : 'border-neutral-300 text-neutral-700 hover:bg-neutral-100'
             }`}
             title="فاحص التدقيق الإملائي"
           >
-            <CheckCircle2 className="w-3.5 h-3.5 text-rose-600" />
-            <span className="text-[11px]">
+            <CheckCircle2 className="w-2.5 h-2.5 text-rose-600" />
+            <span className="text-[9px]">
               {spellIssues.length > 0 ? `${spellIssues.length} أخطاء` : 'سليم'}
             </span>
           </button>
@@ -943,25 +946,25 @@ export const WordEditor: React.FC<WordEditorProps> = ({
           {onToggleKeyboard && (
             <button
               onClick={onToggleKeyboard}
-              className={`h-7 px-2.5 rounded-md border flex items-center gap-1.5 font-bold transition-all ${
+              className={`h-4 px-1.5 rounded border flex items-center gap-1 font-bold transition-all leading-none ${
                 isKeyboardOpen
-                  ? 'bg-cyan-600 text-white border-cyan-700 shadow-xs'
+                  ? 'bg-cyan-600 text-white border-cyan-700 shadow-2xs'
                   : 'bg-neutral-100 hover:bg-neutral-200 text-neutral-800 border-neutral-300'
               }`}
               title="تشغيل / إخفاء الكيبورد العربي الملحق"
             >
-              <KeyboardIcon className="w-3.5 h-3.5" />
-              <span className="text-[11px]">كيبورد ملحق</span>
+              <KeyboardIcon className="w-2.5 h-2.5" />
+              <span className="text-[9px]">كيبورد</span>
             </button>
           )}
 
           {/* Search trigger */}
           <button
             onClick={() => setShowSearchModal(true)}
-            className="p-1.5 hover:bg-neutral-100 text-neutral-600 rounded border border-neutral-300"
+            className="p-0.5 hover:bg-neutral-100 text-neutral-600 rounded border border-neutral-300 h-4 w-4 flex items-center justify-center"
             title="بحث واستبدال"
           >
-            <Search className="w-3.5 h-3.5" />
+            <Search className="w-2.5 h-2.5" />
           </button>
         </div>
       </div>
@@ -1025,49 +1028,52 @@ export const WordEditor: React.FC<WordEditorProps> = ({
         </div>
       )}
 
-      {/* Bottom Status Bar */}
-      <div className="bg-white border-t border-neutral-300 px-4 py-1.5 flex items-center justify-between text-xs text-neutral-600 select-none z-20">
-        <div className="flex items-center gap-4">
+      {/* Bottom Status Bar (Exact 0.5cm height) */}
+      <div 
+        style={{ height: '0.5cm', minHeight: '0.5cm', maxHeight: '0.5cm' }}
+        className="bg-white border-t border-neutral-300 px-3 py-0 flex items-center justify-between text-[10px] text-neutral-600 select-none z-20 leading-none overflow-hidden"
+      >
+        <div className="flex items-center gap-2">
           <span>الكلمات: <strong className="font-mono text-neutral-800">{stats.words}</strong></span>
           <span>الأحرف: <strong className="font-mono text-neutral-800">{stats.chars}</strong></span>
           <span>الصفحات: <strong className="font-mono text-neutral-800">{stats.pages}</strong></span>
-          <div className="h-3.5 w-px bg-neutral-300" />
+          <div className="h-3 w-px bg-neutral-300" />
           <button
             onClick={() => setShowSpellModal(true)}
-            className="flex items-center gap-1 text-[11px] text-rose-700 hover:underline cursor-pointer"
+            className="flex items-center gap-0.5 text-[9px] text-rose-700 hover:underline cursor-pointer"
           >
-            <CheckCircle2 className="w-3.5 h-3.5" />
-            <span>التدقيق الإملائي ({spellIssues.length} أخطاء)</span>
+            <CheckCircle2 className="w-2.5 h-2.5" />
+            <span>التدقيق ({spellIssues.length})</span>
           </button>
         </div>
 
         {/* Zoom & Keyboard Controls */}
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-1.5">
           {onToggleKeyboard && (
             <button
               onClick={onToggleKeyboard}
-              className="flex items-center gap-1 px-2 py-0.5 bg-neutral-100 hover:bg-neutral-200 rounded border border-neutral-300 text-[11px] font-semibold text-neutral-700"
+              className="flex items-center gap-0.5 px-1.5 py-0 h-3.5 bg-neutral-100 hover:bg-neutral-200 rounded border border-neutral-300 text-[9px] font-semibold text-neutral-700 leading-none"
             >
-              <KeyboardIcon className="w-3.5 h-3.5" />
-              <span>كيبورد عربي</span>
+              <KeyboardIcon className="w-2.5 h-2.5" />
+              <span>كيبورد</span>
             </button>
           )}
 
-          <div className="flex items-center gap-1">
+          <div className="flex items-center gap-0.5">
             <button
               onClick={() => setZoom(Math.max(50, zoom - 10))}
-              className="p-1 hover:bg-neutral-100 rounded"
+              className="p-0.5 hover:bg-neutral-100 rounded"
               title="تصغير العرض"
             >
-              <Minus className="w-3 h-3" />
+              <Minus className="w-2.5 h-2.5" />
             </button>
-            <span className="font-mono text-xs w-10 text-center font-bold">{zoom}%</span>
+            <span className="font-mono text-[9px] w-8 text-center font-bold">{zoom}%</span>
             <button
               onClick={() => setZoom(Math.min(150, zoom + 10))}
-              className="p-1 hover:bg-neutral-100 rounded"
+              className="p-0.5 hover:bg-neutral-100 rounded"
               title="تكبير العرض"
             >
-              <Plus className="w-3 h-3" />
+              <Plus className="w-2.5 h-2.5" />
             </button>
           </div>
         </div>
