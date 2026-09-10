@@ -44,7 +44,10 @@ import {
   Redo,
   Upload,
   Layers,
-  Wand2
+  Wand2,
+  Loader2,
+  Download,
+  FileDown
 } from 'lucide-react';
 import { DocumentState } from '../../types';
 import { SpellIssue, detectSpellingIssues } from '../../utils/arabicSpellCheck';
@@ -58,6 +61,8 @@ interface WordEditorProps {
   onOpenTemplates: () => void;
   onToggleKeyboard?: () => void;
   isKeyboardOpen?: boolean;
+  saveStatus?: 'saving' | 'saved';
+  onExportPdf?: () => void;
 }
 
 export const ARABIC_FONTS = [
@@ -72,6 +77,7 @@ export const ARABIC_FONTS = [
   { id: 'Reem Kufi', name: 'ريم كوفي (Reem Kufi)', font: '"Reem Kufi", sans-serif' },
   { id: 'Aref Ruqaa', name: 'رقعة (Aref Ruqaa)', font: '"Aref Ruqaa", serif' },
   { id: 'Lateef', name: 'لطيف (Lateef)', font: 'Lateef, serif' },
+  { id: 'Traditional Arabic', name: 'الخط التقليدي (Traditional)', font: '"Traditional Arabic", Arial, sans-serif' },
   { id: 'Arial', name: 'Arial', font: 'Arial, sans-serif' },
   { id: 'Times New Roman', name: 'Times New Roman', font: '"Times New Roman", serif' },
 ];
@@ -82,6 +88,8 @@ export const WordEditor: React.FC<WordEditorProps> = ({
   onOpenTemplates,
   onToggleKeyboard,
   isKeyboardOpen = false,
+  saveStatus = 'saved',
+  onExportPdf,
 }) => {
   const [fontFamily, setFontFamily] = useState(documentState.fontFamily || 'Cairo');
   const [fontSize, setFontSize] = useState(documentState.fontSize || '14');
@@ -238,10 +246,42 @@ export const WordEditor: React.FC<WordEditorProps> = ({
   };
 
   // Font styling handlers
-  const handleFontFamilyChange = (font: string) => {
-    setFontFamily(font);
-    execCmd('fontName', font);
-    onChange({ ...documentState, fontFamily: font });
+  const handleFontFamilyChange = (fontId: string) => {
+    setFontFamily(fontId);
+    restoreSelection();
+
+    const fontObj = ARABIC_FONTS.find(f => f.id === fontId);
+    const fontCss = fontObj ? fontObj.font : fontId;
+
+    const selection = window.getSelection();
+    if (selection && selection.rangeCount > 0 && !selection.isCollapsed) {
+      try {
+        const range = selection.getRangeAt(0);
+        const span = document.createElement('span');
+        span.style.fontFamily = fontCss;
+        
+        const fragment = range.extractContents();
+        span.appendChild(fragment);
+        range.insertNode(span);
+
+        // Keep the selection around the new span
+        const newRange = document.createRange();
+        newRange.selectNodeContents(span);
+        selection.removeAllRanges();
+        selection.addRange(newRange);
+        saveSelection();
+      } catch (err) {
+        document.execCommand('fontName', false, fontCss);
+      }
+    } else {
+      // Set default font for entire document
+      onChange({ ...documentState, fontFamily: fontId });
+    }
+
+    if (editorRef.current) {
+      editorRef.current.focus();
+    }
+    handleInput();
   };
 
   const handleFontSizeChange = (size: string) => {
@@ -506,8 +546,22 @@ export const WordEditor: React.FC<WordEditorProps> = ({
                   }}
                   className="w-full px-3 py-1.5 hover:bg-neutral-100 text-neutral-700 flex items-center justify-between text-xs"
                 >
-                  <span>طباعة / حفظ PDF</span>
+                  <span>طباعة المستند</span>
                   <span className="text-[10px] text-neutral-400 font-mono">Ctrl+P</span>
+                </button>
+                <button
+                  id="word-dropdown-export-pdf-btn"
+                  onClick={() => {
+                    if (onExportPdf) onExportPdf();
+                    setActiveDropdown(null);
+                  }}
+                  className="w-full px-3 py-1.5 hover:bg-rose-50 text-neutral-800 font-semibold flex items-center justify-between text-xs border-t border-neutral-100"
+                >
+                  <div className="flex items-center gap-1.5">
+                    <FileDown className="w-3.5 h-3.5 text-rose-600" />
+                    <span>تصدير PDF مباشر</span>
+                    <span className="text-[9px] bg-rose-100 text-rose-700 font-mono font-bold px-1 rounded">jsPDF</span>
+                  </div>
                 </button>
               </div>
             )}
@@ -731,15 +785,19 @@ export const WordEditor: React.FC<WordEditorProps> = ({
 
           <div className="h-3 w-px bg-neutral-300 mx-0.5" />
 
-          {/* Font Selector in 0.5cm bar */}
+          {/* Font Selector in 0.5cm bar (Arabic fonts dropdown) */}
           <select
+            id="word-font-family-select"
             value={fontFamily}
+            onMouseDown={saveSelection}
             onChange={(e) => handleFontFamilyChange(e.target.value)}
-            className="h-4 bg-neutral-50 hover:bg-white border border-neutral-300 rounded px-1 text-[10px] font-semibold text-neutral-800 focus:outline-hidden cursor-pointer max-w-[100px] leading-none py-0"
-            title="نوع الخط العربي"
+            className="h-4 bg-neutral-50 hover:bg-white border border-neutral-300 rounded px-1 text-[10px] font-semibold text-neutral-800 focus:outline-hidden cursor-pointer max-w-[125px] leading-none py-0"
+            title="تغيير نوع خط النص المحدد أو المستند من قائمة الخطوط العربية المعتمدة"
           >
             {ARABIC_FONTS.map(f => (
-              <option key={f.id} value={f.id}>{f.name}</option>
+              <option key={f.id} value={f.id} style={{ fontFamily: f.font }}>
+                {f.name}
+              </option>
             ))}
           </select>
 
@@ -961,11 +1019,34 @@ export const WordEditor: React.FC<WordEditorProps> = ({
           {/* Search trigger */}
           <button
             onClick={() => setShowSearchModal(true)}
-            className="p-0.5 hover:bg-neutral-100 text-neutral-600 rounded border border-neutral-300 h-4 w-4 flex items-center justify-center"
+            className="p-0.5 hover:bg-neutral-100 text-neutral-600 rounded border border-neutral-300 h-4 w-4 flex items-center justify-center cursor-pointer"
             title="بحث واستبدال"
           >
             <Search className="w-2.5 h-2.5" />
           </button>
+
+          {/* Auto-Save Indicator Beside Word Toolbar */}
+          <div
+            id="word-toolbar-auto-save-indicator"
+            className={`flex items-center gap-1 px-1.5 py-0 h-4 rounded border text-[9px] font-semibold whitespace-nowrap transition-all select-none leading-none ${
+              saveStatus === 'saving'
+                ? 'bg-amber-50 text-amber-700 border-amber-300 shadow-2xs'
+                : 'bg-emerald-50 text-emerald-700 border-emerald-300'
+            }`}
+            title={saveStatus === 'saving' ? 'جاري الحفظ التلقائي...' : 'تم حفظ جميع التغييرات'}
+          >
+            {saveStatus === 'saving' ? (
+              <>
+                <Loader2 className="w-2.5 h-2.5 text-amber-600 animate-spin shrink-0" />
+                <span className="hidden sm:inline">جاري الحفظ...</span>
+              </>
+            ) : (
+              <>
+                <CheckCircle2 className="w-2.5 h-2.5 text-emerald-600 shrink-0" />
+                <span className="hidden sm:inline">تم الحفظ</span>
+              </>
+            )}
+          </div>
         </div>
       </div>
 
@@ -993,8 +1074,15 @@ export const WordEditor: React.FC<WordEditorProps> = ({
             contentEditable
             suppressContentEditableWarning
             onInput={handleInput}
-            onKeyUp={checkCursorInTable}
-            onMouseUp={checkCursorInTable}
+            onKeyUp={() => {
+              checkCursorInTable();
+              saveSelection();
+            }}
+            onMouseUp={() => {
+              checkCursorInTable();
+              saveSelection();
+            }}
+            onSelect={saveSelection}
             style={{
               fontFamily: ARABIC_FONTS.find(f => f.id === fontFamily)?.font || fontFamily,
               fontSize: `${fontSize}pt`,
@@ -1028,21 +1116,31 @@ export const WordEditor: React.FC<WordEditorProps> = ({
         </div>
       )}
 
-      {/* Bottom Status Bar (Exact 0.5cm height) */}
-      <div 
+      {/* Bottom Status Bar (Exact 0.5cm height - displays word & character counts) */}
+      <footer 
+        id="word-editor-status-bar"
         style={{ height: '0.5cm', minHeight: '0.5cm', maxHeight: '0.5cm' }}
         className="bg-white border-t border-neutral-300 px-3 py-0 flex items-center justify-between text-[10px] text-neutral-600 select-none z-20 leading-none overflow-hidden"
       >
-        <div className="flex items-center gap-2">
-          <span>الكلمات: <strong className="font-mono text-neutral-800">{stats.words}</strong></span>
-          <span>الأحرف: <strong className="font-mono text-neutral-800">{stats.chars}</strong></span>
-          <span>الصفحات: <strong className="font-mono text-neutral-800">{stats.pages}</strong></span>
+        <div className="flex items-center gap-2.5">
+          <span id="word-count-display" className="flex items-center gap-1 font-medium text-neutral-700">
+            <span>عدد الكلمات:</span>
+            <strong className="font-mono text-neutral-900 font-bold bg-neutral-100 px-1 rounded">{stats.words}</strong>
+          </span>
+          <span id="char-count-display" className="flex items-center gap-1 font-medium text-neutral-700">
+            <span>عدد الأحرف:</span>
+            <strong className="font-mono text-neutral-900 font-bold bg-neutral-100 px-1 rounded">{stats.chars}</strong>
+          </span>
+          <span id="pages-count-display" className="flex items-center gap-1 font-medium text-neutral-700 hidden sm:flex">
+            <span>الصفحات:</span>
+            <strong className="font-mono text-neutral-900 font-bold bg-neutral-100 px-1 rounded">{stats.pages}</strong>
+          </span>
           <div className="h-3 w-px bg-neutral-300" />
           <button
             onClick={() => setShowSpellModal(true)}
             className="flex items-center gap-0.5 text-[9px] text-rose-700 hover:underline cursor-pointer"
           >
-            <CheckCircle2 className="w-2.5 h-2.5" />
+            <CheckCircle2 className="w-2.5 h-2.5 text-emerald-600" />
             <span>التدقيق ({spellIssues.length})</span>
           </button>
         </div>
@@ -1077,7 +1175,7 @@ export const WordEditor: React.FC<WordEditorProps> = ({
             </button>
           </div>
         </div>
-      </div>
+      </footer>
 
       {/* TABLE INSERTION MODAL */}
       {showTableModal && (

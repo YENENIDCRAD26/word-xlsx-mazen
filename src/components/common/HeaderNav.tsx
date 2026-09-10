@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import { 
   FileText, 
   Table as TableIcon, 
@@ -11,7 +11,10 @@ import {
   Redo, 
   CheckCircle2, 
   RotateCcw,
-  Keyboard as KeyboardIcon
+  Keyboard as KeyboardIcon,
+  Loader2,
+  ChevronDown,
+  FileDown
 } from 'lucide-react';
 import { OfficeMode } from '../../types';
 
@@ -21,6 +24,7 @@ interface HeaderNavProps {
   title: string;
   onTitleChange: (title: string) => void;
   onExport: () => void;
+  onExportPdf?: () => void;
   onImportClick: () => void;
   onSave: () => void;
   onPrint: () => void;
@@ -31,6 +35,7 @@ interface HeaderNavProps {
   onUndo?: () => void;
   onRedo?: () => void;
   isSaved?: boolean;
+  saveStatus?: 'saving' | 'saved';
   onToggleKeyboard?: () => void;
   isKeyboardOpen?: boolean;
 }
@@ -41,6 +46,7 @@ export const HeaderNav: React.FC<HeaderNavProps> = ({
   title,
   onTitleChange,
   onExport,
+  onExportPdf,
   onImportClick,
   onSave,
   onPrint,
@@ -51,9 +57,24 @@ export const HeaderNav: React.FC<HeaderNavProps> = ({
   onUndo,
   onRedo,
   isSaved = true,
+  saveStatus = 'saved',
   onToggleKeyboard,
   isKeyboardOpen = false,
 }) => {
+  const [showExportDropdown, setShowExportDropdown] = useState(false);
+  const exportDropdownRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    const handleClickOutside = (e: MouseEvent) => {
+      if (exportDropdownRef.current && !exportDropdownRef.current.contains(e.target as Node)) {
+        setShowExportDropdown(false);
+      }
+    };
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, []);
+
+  const isSaving = saveStatus === 'saving' || !isSaved;
   return (
     <header 
       style={{ height: '0.5cm', minHeight: '0.5cm', maxHeight: '0.5cm' }}
@@ -103,7 +124,7 @@ export const HeaderNav: React.FC<HeaderNavProps> = ({
           </div>
         </div>
 
-        {/* Center: Title editing and saving status */}
+        {/* Center: Title editing and Auto-Save visual indicator */}
         <div className="flex items-center gap-1.5 flex-1 max-w-sm mx-1 h-full">
           <input
             id="document-title-input"
@@ -113,9 +134,26 @@ export const HeaderNav: React.FC<HeaderNavProps> = ({
             className="w-full text-center text-[10px] font-semibold text-neutral-800 bg-neutral-50 hover:bg-neutral-100 focus:bg-white border border-neutral-200 focus:border-blue-500 rounded px-1.5 h-4 transition-colors outline-hidden truncate"
             title="انقر لتعديل اسم المستند"
           />
-          <div className="flex items-center gap-0.5 text-[9px] text-neutral-500 whitespace-nowrap" title={isSaved ? 'تم الحفظ تلقائياً' : 'تغييرات غير محفوظة'}>
-            <CheckCircle2 className={`w-3 h-3 ${isSaved ? 'text-emerald-500' : 'text-amber-500 animate-pulse'}`} />
-            <span className="hidden xl:inline">{isSaved ? 'محفوظ' : 'حفظ'}</span>
+          <div 
+            id="header-auto-save-indicator"
+            className={`flex items-center gap-1 px-1.5 py-0 h-4 rounded border text-[9px] font-semibold whitespace-nowrap transition-all select-none leading-none ${
+              isSaving 
+                ? 'bg-amber-50 text-amber-700 border-amber-300 shadow-2xs' 
+                : 'bg-emerald-50 text-emerald-700 border-emerald-300'
+            }`} 
+            title={isSaving ? 'جاري الحفظ التلقائي...' : 'تم الحفظ تلقائياً في المتصفح'}
+          >
+            {isSaving ? (
+              <>
+                <Loader2 className="w-2.5 h-2.5 text-amber-600 animate-spin shrink-0" />
+                <span className="hidden sm:inline">جاري الحفظ...</span>
+              </>
+            ) : (
+              <>
+                <CheckCircle2 className="w-2.5 h-2.5 text-emerald-600 shrink-0" />
+                <span className="hidden sm:inline">تم الحفظ</span>
+              </>
+            )}
           </div>
         </div>
 
@@ -206,19 +244,89 @@ export const HeaderNav: React.FC<HeaderNavProps> = ({
             </button>
           )}
 
-          {/* Export File Button */}
-          <button
-            id="export-file-btn"
-            onClick={onExport}
-            className={`flex items-center gap-1 px-2 py-0 h-4 text-[10px] font-bold text-white rounded shadow-2xs transition-colors leading-none ${
-              mode === 'word'
-                ? 'bg-blue-700 hover:bg-blue-800'
-                : 'bg-emerald-700 hover:bg-emerald-800'
-            }`}
-          >
-            <Download className="w-2.5 h-2.5" />
-            <span>تصدير {mode === 'word' ? 'DOCX' : 'XLSX'}</span>
-          </button>
+          {/* Export Menu Dropdown (DOCX/XLSX and jsPDF) */}
+          <div className="relative" ref={exportDropdownRef}>
+            <button
+              id="export-dropdown-toggle-btn"
+              onClick={() => setShowExportDropdown(!showExportDropdown)}
+              className={`flex items-center gap-1 px-2 py-0 h-4 text-[10px] font-bold text-white rounded shadow-2xs transition-colors leading-none cursor-pointer ${
+                mode === 'word'
+                  ? 'bg-blue-700 hover:bg-blue-800'
+                  : 'bg-emerald-700 hover:bg-emerald-800'
+              }`}
+              title="خيارات التصدير والتحويل (DOCX / XLSX / PDF)"
+            >
+              <Download className="w-2.5 h-2.5" />
+              <span>تصدير</span>
+              <ChevronDown className="w-2 h-2 text-white/80" />
+            </button>
+
+            {showExportDropdown && (
+              <div 
+                id="export-options-dropdown"
+                className="absolute left-0 top-full mt-1 bg-white border border-neutral-300 rounded-lg shadow-xl py-1.5 w-64 z-50 text-right text-xs"
+              >
+                <div className="px-3 py-1 text-[10px] font-bold text-neutral-400 border-b border-neutral-100 select-none">
+                  خيارات التصدير المتاحة
+                </div>
+
+                {/* Option 1: Native Office File (DOCX / XLSX) */}
+                <button
+                  id="export-native-file-option"
+                  onClick={() => {
+                    onExport();
+                    setShowExportDropdown(false);
+                  }}
+                  className="w-full px-3 py-2 hover:bg-neutral-100 text-neutral-800 font-semibold flex items-center justify-between text-right cursor-pointer"
+                >
+                  <div className="flex items-center gap-2">
+                    {mode === 'word' ? (
+                      <FileText className="w-4 h-4 text-blue-600 shrink-0" />
+                    ) : (
+                      <TableIcon className="w-4 h-4 text-emerald-600 shrink-0" />
+                    )}
+                    <div>
+                      <div className="text-xs font-bold text-neutral-900">
+                        تصدير {mode === 'word' ? 'مستند Word (.docx)' : 'مصنف Excel (.xlsx)'}
+                      </div>
+                      <div className="text-[10px] text-neutral-500 font-normal">
+                        الملف الأصلي القابل للتعديل
+                      </div>
+                    </div>
+                  </div>
+                  <span className="text-[10px] text-neutral-500 font-mono font-bold bg-neutral-100 px-1.5 py-0.5 rounded">
+                    {mode === 'word' ? 'DOCX' : 'XLSX'}
+                  </span>
+                </button>
+
+                {/* Option 2: Direct PDF Export via jsPDF */}
+                <button
+                  id="export-pdf-jspdf-option"
+                  onClick={() => {
+                    if (onExportPdf) onExportPdf();
+                    setShowExportDropdown(false);
+                  }}
+                  className="w-full px-3 py-2 hover:bg-rose-50 text-neutral-800 font-semibold flex items-center justify-between text-right border-t border-neutral-100 cursor-pointer"
+                >
+                  <div className="flex items-center gap-2">
+                    <FileDown className="w-4 h-4 text-rose-600 shrink-0" />
+                    <div>
+                      <div className="text-xs font-bold text-neutral-900 flex items-center gap-1.5">
+                        <span>تصدير إلى ملف PDF مباشر</span>
+                        <span className="text-[9px] bg-rose-100 text-rose-700 font-mono font-bold px-1 rounded">jsPDF</span>
+                      </div>
+                      <div className="text-[10px] text-neutral-500 font-normal">
+                        تحويل فوري عالي الدقة عبر jsPDF
+                      </div>
+                    </div>
+                  </div>
+                  <span className="text-[10px] text-rose-600 font-mono font-bold bg-rose-50 border border-rose-200 px-1.5 py-0.5 rounded">
+                    PDF
+                  </span>
+                </button>
+              </div>
+            )}
+          </div>
 
           {/* Reset document */}
           <button

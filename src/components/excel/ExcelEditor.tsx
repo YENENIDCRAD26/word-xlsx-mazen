@@ -29,7 +29,11 @@ import {
   Keyboard as KeyboardIcon,
   Sparkles,
   Printer,
-  Table as TableIcon
+  Table as TableIcon,
+  Loader2,
+  CheckCircle2,
+  Download,
+  FileDown
 } from 'lucide-react';
 import { WorkbookState, SheetData, CellData, CellStyle } from '../../types';
 import {
@@ -49,6 +53,8 @@ interface ExcelEditorProps {
   onOpenTemplates: () => void;
   onToggleKeyboard?: () => void;
   isKeyboardOpen?: boolean;
+  saveStatus?: 'saving' | 'saved';
+  onExportPdf?: () => void;
 }
 
 const NUM_ROWS = 40;
@@ -60,6 +66,8 @@ export const ExcelEditor: React.FC<ExcelEditorProps> = ({
   onOpenTemplates,
   onToggleKeyboard,
   isKeyboardOpen = false,
+  saveStatus = 'saved',
+  onExportPdf,
 }) => {
   const [selectedCellId, setSelectedCellId] = useState<string>('A1');
   const [isEditingCell, setIsEditingCell] = useState<boolean>(false);
@@ -78,6 +86,8 @@ export const ExcelEditor: React.FC<ExcelEditorProps> = ({
   const [showBorderPicker, setShowBorderPicker] = useState(false);
   const [showFormatPicker, setShowFormatPicker] = useState(false);
   const [showChartModal, setShowChartModal] = useState(false);
+  const [miniFillPickerOpen, setMiniFillPickerOpen] = useState(false);
+  const [miniTextPickerOpen, setMiniTextPickerOpen] = useState(false);
 
   // Active sheet
   const activeSheet = useMemo(() => {
@@ -385,6 +395,20 @@ export const ExcelEditor: React.FC<ExcelEditorProps> = ({
                 >
                   <span>طباعة الشبكة</span>
                   <Printer className="w-3.5 h-3.5 text-neutral-400" />
+                </button>
+                <button
+                  id="excel-dropdown-export-pdf-btn"
+                  onClick={() => {
+                    if (onExportPdf) onExportPdf();
+                    setActiveDropdown(null);
+                  }}
+                  className="w-full px-3 py-1.5 hover:bg-rose-50 text-neutral-800 font-semibold flex items-center justify-between border-t border-neutral-100 cursor-pointer"
+                >
+                  <div className="flex items-center gap-1.5">
+                    <FileDown className="w-3.5 h-3.5 text-rose-600" />
+                    <span>تصدير PDF مباشر</span>
+                    <span className="text-[9px] bg-rose-100 text-rose-700 font-mono font-bold px-1 rounded">jsPDF</span>
+                  </div>
                 </button>
               </div>
             )}
@@ -802,16 +826,39 @@ export const ExcelEditor: React.FC<ExcelEditorProps> = ({
 
           <button
             onClick={() => updateCell(selectedCellId, { value: '' })}
-            className="p-0.5 text-neutral-400 hover:text-red-600 hover:bg-red-50 rounded border border-neutral-200 h-4 w-4 flex items-center justify-center"
+            className="p-0.5 text-neutral-400 hover:text-red-600 hover:bg-red-50 rounded border border-neutral-200 h-4 w-4 flex items-center justify-center cursor-pointer"
             title="مسح الخلية المحددة"
           >
             <Trash2 className="w-2.5 h-2.5" />
           </button>
+
+          {/* Auto-Save Indicator Beside Top Excel Toolbar */}
+          <div
+            id="excel-toolbar-auto-save-indicator"
+            className={`flex items-center gap-1 px-1.5 py-0 h-4 rounded border text-[9px] font-semibold whitespace-nowrap transition-all select-none leading-none ${
+              saveStatus === 'saving'
+                ? 'bg-amber-50 text-amber-700 border-amber-300 shadow-2xs'
+                : 'bg-emerald-50 text-emerald-700 border-emerald-300'
+            }`}
+            title={saveStatus === 'saving' ? 'جاري الحفظ التلقائي...' : 'تم حفظ جميع التغييرات'}
+          >
+            {saveStatus === 'saving' ? (
+              <>
+                <Loader2 className="w-2.5 h-2.5 text-amber-600 animate-spin shrink-0" />
+                <span className="hidden sm:inline">جاري الحفظ...</span>
+              </>
+            ) : (
+              <>
+                <CheckCircle2 className="w-2.5 h-2.5 text-emerald-600 shrink-0" />
+                <span className="hidden sm:inline">تم الحفظ</span>
+              </>
+            )}
+          </div>
         </div>
       </div>
 
       {/* Formula Bar */}
-      <div className="flex items-center px-4 py-1.5 bg-white border-b border-neutral-300 gap-2 text-xs select-none">
+      <div className="flex items-center px-4 py-1 bg-white border-b border-neutral-300 gap-2 text-xs select-none">
         <div className="w-14 text-center font-mono font-bold text-neutral-800 bg-neutral-100 border border-neutral-300 rounded px-1.5 py-0.5">
           {selectedCellId}
         </div>
@@ -833,6 +880,240 @@ export const ExcelEditor: React.FC<ExcelEditorProps> = ({
             placeholder="أدخل قيمة أو صيغة رياضية (مثال: =SUM(A1:A5) أو 1500)"
             className="w-full bg-neutral-50 hover:bg-white focus:bg-white border border-neutral-300 focus:border-emerald-600 focus:ring-1 focus:ring-emerald-600 rounded px-3 py-1 text-neutral-900 font-mono text-xs outline-hidden"
           />
+        </div>
+      </div>
+
+      {/* DEDICATED MINI TOOLBAR ABOVE EXCEL GRID TABLES (شريط أدوات مصغر فوق جداول إكسيل) */}
+      <div 
+        id="excel-mini-toolbar"
+        className="bg-neutral-50 border-b border-neutral-300 px-3 py-1 flex items-center justify-between gap-2 text-xs select-none z-20 shadow-2xs overflow-x-auto"
+      >
+        {/* Right Side: Quick cell formatting tools (Fill, Text Color, Alignments) */}
+        <div className="flex items-center gap-1.5 shrink-0">
+          {/* Active Cell Indicator */}
+          <div className="flex items-center gap-1 font-mono font-bold text-[11px] text-emerald-800 bg-emerald-100/90 border border-emerald-300 rounded px-2 py-0.5 shadow-2xs">
+            <span className="text-[9px] text-emerald-600 font-sans font-normal">الخلية:</span>
+            <span>{selectedCellId}</span>
+          </div>
+
+          <div className="h-4 w-px bg-neutral-300 mx-0.5" />
+
+          {/* 1. Cell Background Color (تغيير لون خلفية الخلية) */}
+          <div className="relative">
+            <button
+              id="mini-cell-bg-btn"
+              onClick={() => {
+                setMiniFillPickerOpen(!miniFillPickerOpen);
+                setMiniTextPickerOpen(false);
+              }}
+              className="flex items-center gap-1.5 px-2 py-1 bg-white hover:bg-neutral-100 rounded border border-neutral-300 text-neutral-800 font-semibold text-[11px] transition-colors cursor-pointer shadow-2xs"
+              title="تغيير لون خلفية الخلية المحددة"
+            >
+              <Palette className="w-3.5 h-3.5 text-emerald-600" />
+              <span>لون الخلفية</span>
+              <span 
+                className="w-3 h-3 rounded-xs border border-neutral-400 inline-block shadow-2xs shrink-0" 
+                style={{ backgroundColor: selectedCell?.style?.backgroundColor || '#ffffff' }}
+              />
+              <ChevronDown className="w-2.5 h-2.5 text-neutral-400" />
+            </button>
+
+            {miniFillPickerOpen && (
+              <div 
+                id="mini-fill-picker-dropdown"
+                className="absolute right-0 top-full mt-1 bg-white border border-neutral-300 rounded-xl shadow-2xl p-2.5 z-50 w-56 text-right"
+              >
+                <div className="flex items-center justify-between text-[11px] font-bold text-neutral-600 mb-2 pb-1 border-b border-neutral-100">
+                  <span>لوحة ألوان خلفية الخلية</span>
+                  <button
+                    onClick={() => {
+                      updateSelectedCellStyle({ backgroundColor: undefined });
+                      setMiniFillPickerOpen(false);
+                    }}
+                    className="text-[10px] text-red-600 hover:underline font-normal"
+                  >
+                    إلغاء التعبئة
+                  </button>
+                </div>
+                <div className="grid grid-cols-5 gap-1.5">
+                  {colorPalette.map((c) => (
+                    <button
+                      key={c}
+                      onClick={() => {
+                        updateSelectedCellStyle({ backgroundColor: c });
+                        setMiniFillPickerOpen(false);
+                      }}
+                      style={{ backgroundColor: c }}
+                      className={`w-8 h-8 rounded border transition-transform hover:scale-110 cursor-pointer flex items-center justify-center ${
+                        selectedCell?.style?.backgroundColor === c ? 'border-emerald-600 ring-2 ring-emerald-400' : 'border-neutral-300'
+                      }`}
+                      title={c}
+                    >
+                      {selectedCell?.style?.backgroundColor === c && (
+                        <Check className="w-3.5 h-3.5 text-neutral-800" />
+                      )}
+                    </button>
+                  ))}
+                </div>
+              </div>
+            )}
+          </div>
+
+          {/* 2. Cell Text Color (تغيير لون النص) */}
+          <div className="relative">
+            <button
+              id="mini-cell-text-color-btn"
+              onClick={() => {
+                setMiniTextPickerOpen(!miniTextPickerOpen);
+                setMiniFillPickerOpen(false);
+              }}
+              className="flex items-center gap-1.5 px-2 py-1 bg-white hover:bg-neutral-100 rounded border border-neutral-300 text-neutral-800 font-semibold text-[11px] transition-colors cursor-pointer shadow-2xs"
+              title="تغيير لون نص الخلية المحددة"
+            >
+              <div className="relative flex flex-col items-center">
+                <span className="font-bold font-serif text-xs leading-none">A</span>
+                <span 
+                  className="w-3 h-0.5 rounded-full mt-0.5" 
+                  style={{ backgroundColor: selectedCell?.style?.color || '#000000' }}
+                />
+              </div>
+              <span>لون النص</span>
+              <span 
+                className="w-3 h-3 rounded-xs border border-neutral-400 inline-block shadow-2xs shrink-0" 
+                style={{ backgroundColor: selectedCell?.style?.color || '#000000' }}
+              />
+              <ChevronDown className="w-2.5 h-2.5 text-neutral-400" />
+            </button>
+
+            {miniTextPickerOpen && (
+              <div 
+                id="mini-text-color-picker-dropdown"
+                className="absolute right-0 top-full mt-1 bg-white border border-neutral-300 rounded-xl shadow-2xl p-2.5 z-50 w-56 text-right"
+              >
+                <div className="flex items-center justify-between text-[11px] font-bold text-neutral-600 mb-2 pb-1 border-b border-neutral-100">
+                  <span>لوحة ألوان النص</span>
+                  <button
+                    onClick={() => {
+                      updateSelectedCellStyle({ color: undefined });
+                      setMiniTextPickerOpen(false);
+                    }}
+                    className="text-[10px] text-neutral-500 hover:underline font-normal"
+                  >
+                    افتراضي
+                  </button>
+                </div>
+                <div className="grid grid-cols-4 gap-1.5">
+                  {textColorPalette.map((c) => (
+                    <button
+                      key={c}
+                      onClick={() => {
+                        updateSelectedCellStyle({ color: c });
+                        setMiniTextPickerOpen(false);
+                      }}
+                      style={{ backgroundColor: c }}
+                      className={`w-9 h-8 rounded border transition-transform hover:scale-110 cursor-pointer flex items-center justify-center ${
+                        selectedCell?.style?.color === c ? 'border-blue-600 ring-2 ring-blue-400' : 'border-neutral-300'
+                      }`}
+                      title={c}
+                    >
+                      {selectedCell?.style?.color === c && (
+                        <Check className="w-3.5 h-3.5 text-white filter drop-shadow-sm" />
+                      )}
+                    </button>
+                  ))}
+                </div>
+              </div>
+            )}
+          </div>
+
+          <div className="h-4 w-px bg-neutral-300 mx-0.5" />
+
+          {/* 3. Text Alignment: Right, Center, Left (تنسيق المحاذاة: يمين، وسط، يسار) */}
+          <div 
+            id="mini-alignment-button-group"
+            className="flex items-center bg-white rounded border border-neutral-300 p-0.5 shadow-2xs"
+          >
+            <button
+              id="mini-align-right-btn"
+              onClick={() => updateSelectedCellStyle({ align: 'right' })}
+              className={`px-2 py-1 rounded text-xs transition-colors flex items-center gap-1 cursor-pointer ${
+                (selectedCell?.style?.align || 'right') === 'right'
+                  ? 'bg-emerald-600 text-white font-bold shadow-xs'
+                  : 'text-neutral-700 hover:bg-neutral-100'
+              }`}
+              title="محاذاة لليمين"
+            >
+              <AlignRight className="w-3.5 h-3.5" />
+              <span className="text-[10px]">يمين</span>
+            </button>
+
+            <button
+              id="mini-align-center-btn"
+              onClick={() => updateSelectedCellStyle({ align: 'center' })}
+              className={`px-2 py-1 rounded text-xs transition-colors flex items-center gap-1 cursor-pointer ${
+                selectedCell?.style?.align === 'center'
+                  ? 'bg-emerald-600 text-white font-bold shadow-xs'
+                  : 'text-neutral-700 hover:bg-neutral-100'
+              }`}
+              title="محاذاة للوسط"
+            >
+              <AlignCenter className="w-3.5 h-3.5" />
+              <span className="text-[10px]">وسط</span>
+            </button>
+
+            <button
+              id="mini-align-left-btn"
+              onClick={() => updateSelectedCellStyle({ align: 'left' })}
+              className={`px-2 py-1 rounded text-xs transition-colors flex items-center gap-1 cursor-pointer ${
+                selectedCell?.style?.align === 'left'
+                  ? 'bg-emerald-600 text-white font-bold shadow-xs'
+                  : 'text-neutral-700 hover:bg-neutral-100'
+              }`}
+              title="محاذاة لليسار"
+            >
+              <AlignLeft className="w-3.5 h-3.5" />
+              <span className="text-[10px]">يسار</span>
+            </button>
+          </div>
+
+          {/* Bold Quick Toggle */}
+          <button
+            id="mini-bold-btn"
+            onClick={() => updateSelectedCellStyle({ bold: !selectedCell?.style?.bold })}
+            className={`p-1 px-2 rounded border text-xs font-bold transition-colors flex items-center gap-1 cursor-pointer shadow-2xs ${
+              selectedCell?.style?.bold
+                ? 'bg-emerald-600 text-white border-emerald-700'
+                : 'bg-white text-neutral-800 border-neutral-300 hover:bg-neutral-100'
+            }`}
+            title="نص عريض (Bold)"
+          >
+            <Bold className="w-3.5 h-3.5" />
+          </button>
+        </div>
+
+        {/* Left Side: Auto-Save visual indicator right on the mini toolbar */}
+        <div className="flex items-center gap-2 shrink-0">
+          <div
+            id="excel-mini-toolbar-auto-save-indicator"
+            className={`flex items-center gap-1.5 px-2 py-1 rounded-full border text-[10px] font-semibold whitespace-nowrap transition-all select-none ${
+              saveStatus === 'saving'
+                ? 'bg-amber-50 text-amber-800 border-amber-300 shadow-xs'
+                : 'bg-emerald-50 text-emerald-800 border-emerald-300 shadow-xs'
+            }`}
+            title={saveStatus === 'saving' ? 'جاري حفظ التغييرات...' : 'تم حفظ جميع البيانات تلقائياً'}
+          >
+            {saveStatus === 'saving' ? (
+              <>
+                <Loader2 className="w-3 h-3 text-amber-600 animate-spin shrink-0" />
+                <span>جاري الحفظ...</span>
+              </>
+            ) : (
+              <>
+                <CheckCircle2 className="w-3 h-3 text-emerald-600 shrink-0" />
+                <span>تم الحفظ</span>
+              </>
+            )}
+          </div>
         </div>
       </div>
 

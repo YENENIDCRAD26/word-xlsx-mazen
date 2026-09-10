@@ -11,6 +11,7 @@ import { ExcelEditor } from './components/excel/ExcelEditor';
 import { TemplateModal } from './components/common/TemplateModal';
 import { downloadAsDocx, importDocxFile, importTextFile } from './utils/docxHandler';
 import { exportWorkbookToXlsx, importXlsxFile, createEmptySheet } from './utils/excelEngine';
+import { exportWordDocumentToPdf, exportExcelSheetToPdf } from './utils/pdfExporter';
 import { WORD_TEMPLATES, EXCEL_TEMPLATES } from './data/templates';
 import { ArabicVirtualKeyboard } from './components/common/ArabicVirtualKeyboard';
 import { CheckCircle, AlertCircle } from 'lucide-react';
@@ -23,6 +24,7 @@ export default function App() {
   const [showTemplatesModal, setShowTemplatesModal] = useState<boolean>(false);
   const [toastMessage, setToastMessage] = useState<string | null>(null);
   const [isSaved, setIsSaved] = useState<boolean>(true);
+  const [saveStatus, setSaveStatus] = useState<'saving' | 'saved'>('saved');
   const [isKeyboardOpen, setIsKeyboardOpen] = useState<boolean>(false);
 
   // Hidden File input ref for opening .docx / .xlsx files
@@ -81,10 +83,12 @@ export default function App() {
   // Auto-save Word Document
   useEffect(() => {
     setIsSaved(false);
+    setSaveStatus('saving');
     const timeout = setTimeout(() => {
       try {
         localStorage.setItem(STORAGE_KEY_WORD, JSON.stringify(wordDoc));
         setIsSaved(true);
+        setSaveStatus('saved');
       } catch (err) {
         console.warn('Auto-save error:', err);
       }
@@ -95,10 +99,12 @@ export default function App() {
   // Auto-save Excel Workbook
   useEffect(() => {
     setIsSaved(false);
+    setSaveStatus('saving');
     const timeout = setTimeout(() => {
       try {
         localStorage.setItem(STORAGE_KEY_EXCEL, JSON.stringify(workbook));
         setIsSaved(true);
+        setSaveStatus('saved');
       } catch (err) {
         console.warn('Auto-save error:', err);
       }
@@ -106,7 +112,7 @@ export default function App() {
     return () => clearTimeout(timeout);
   }, [workbook]);
 
-  // Handle Export based on active mode
+  // Handle Export based on active mode (Native DOCX / XLSX)
   const handleExport = async () => {
     if (mode === 'word') {
       try {
@@ -126,6 +132,22 @@ export default function App() {
         console.error(err);
         showToast('تعذر تصدير ملف Excel، يرجى المحاولة ثانية.');
       }
+    }
+  };
+
+  // Handle Direct PDF Export using jsPDF
+  const handleExportPdf = async () => {
+    try {
+      showToast('جارٍ تحويل وتصدير ملف PDF عالي الجودة عبر jsPDF...');
+      if (mode === 'word') {
+        await exportWordDocumentToPdf(wordDoc.title);
+      } else {
+        await exportExcelSheetToPdf(workbook);
+      }
+      showToast('تم تصدير ملف PDF بنجاح باستخدام jsPDF!');
+    } catch (err) {
+      console.error('PDF export error:', err);
+      showToast('تعذر إنشاء ملف PDF، يرجى التأكد من محتوى الصفحة وإعادة المحاولة.');
     }
   };
 
@@ -338,12 +360,14 @@ export default function App() {
           }
         }}
         onExport={handleExport}
+        onExportPdf={handleExportPdf}
         onImportClick={handleImportClick}
         onSave={handleSave}
         onPrint={handlePrint}
         onOpenTemplates={() => setShowTemplatesModal(true)}
         onReset={handleReset}
         isSaved={isSaved}
+        saveStatus={saveStatus}
         onToggleKeyboard={() => setIsKeyboardOpen(!isKeyboardOpen)}
         isKeyboardOpen={isKeyboardOpen}
       />
@@ -357,6 +381,8 @@ export default function App() {
             onOpenTemplates={() => setShowTemplatesModal(true)}
             onToggleKeyboard={() => setIsKeyboardOpen(!isKeyboardOpen)}
             isKeyboardOpen={isKeyboardOpen}
+            saveStatus={saveStatus}
+            onExportPdf={handleExportPdf}
           />
         ) : (
           <ExcelEditor
@@ -365,6 +391,8 @@ export default function App() {
             onOpenTemplates={() => setShowTemplatesModal(true)}
             onToggleKeyboard={() => setIsKeyboardOpen(!isKeyboardOpen)}
             isKeyboardOpen={isKeyboardOpen}
+            saveStatus={saveStatus}
+            onExportPdf={handleExportPdf}
           />
         )}
       </main>
