@@ -78,48 +78,57 @@ export const HeaderNav: React.FC<HeaderNavProps> = ({
   return (
     <header 
       style={{ height: '0.5cm', minHeight: '0.5cm', maxHeight: '0.5cm' }}
-      className="bg-white border-b border-neutral-300 shadow-2xs select-none sticky top-0 z-30 flex items-center px-2 overflow-x-auto overflow-y-hidden text-[11px] leading-none"
+      className={`select-none sticky top-0 z-30 flex items-center px-2 overflow-x-auto overflow-y-hidden text-[11px] leading-none transition-colors ${
+        mode === 'word' 
+          ? 'bg-[#103663] text-white border-b border-[#0a2342] shadow-xs' 
+          : 'bg-[#0f4d2f] text-white border-b border-[#09331f] shadow-xs'
+      }`}
     >
       {/* Top Application Bar Container */}
       <div className="flex items-center justify-between w-full gap-1.5 h-full">
         {/* Left Side (in RTL): Brand & Document Mode Switcher Tabs */}
         <div className="flex items-center gap-1.5 shrink-0">
-          {/* App Logo / Suite Badge */}
+          {/* App Logo / Suite Badge with PRO indicator */}
           <div className="flex items-center gap-1 pr-0.5">
             <div className={`w-4 h-4 rounded flex items-center justify-center font-bold text-[10px] text-white shadow-2xs transition-colors ${
-              mode === 'word' ? 'bg-blue-700' : 'bg-emerald-700'
+              mode === 'word' ? 'bg-blue-600' : 'bg-emerald-600'
             }`}>
               {mode === 'word' ? 'W' : 'X'}
             </div>
-            <span className="hidden lg:inline font-bold text-[11px] tracking-tight text-neutral-800">أوفيس برو</span>
+            <span className="font-bold text-[11px] tracking-tight text-white">
+              {mode === 'word' ? 'Word' : 'Excel'}
+            </span>
+            <span className="bg-amber-400 text-neutral-950 font-black text-[9px] px-1 py-0.2 rounded shadow-2xs leading-tight">
+              PRO
+            </span>
           </div>
 
           {/* Mode Tabs Switcher (حجم الشريط العلوية التبويبات = 0.5cm) */}
-          <div className="flex items-center bg-neutral-100 p-0.5 rounded border border-neutral-200 h-4">
+          <div className="flex items-center bg-black/25 p-0.5 rounded border border-white/10 h-4">
             <button
               id="switch-to-word-btn"
               onClick={() => onModeChange('word')}
-              className={`flex items-center gap-1 px-2 py-0 h-3.5 text-[10px] font-bold rounded transition-all leading-none ${
+              className={`flex items-center gap-1 px-2 py-0 h-3.5 text-[10px] font-bold rounded transition-all leading-none cursor-pointer ${
                 mode === 'word'
-                  ? 'bg-blue-600 text-white shadow-2xs'
-                  : 'text-neutral-600 hover:text-neutral-900 hover:bg-neutral-200/60'
+                  ? 'bg-blue-500 text-white shadow-2xs'
+                  : 'text-white/70 hover:text-white hover:bg-white/10'
               }`}
             >
               <FileText className="w-2.5 h-2.5" />
-              <span>وورد (Word)</span>
+              <span>وورد</span>
             </button>
 
             <button
               id="switch-to-excel-btn"
               onClick={() => onModeChange('excel')}
-              className={`flex items-center gap-1 px-2 py-0 h-3.5 text-[10px] font-bold rounded transition-all leading-none ${
+              className={`flex items-center gap-1 px-2 py-0 h-3.5 text-[10px] font-bold rounded transition-all leading-none cursor-pointer ${
                 mode === 'excel'
-                  ? 'bg-emerald-600 text-white shadow-2xs'
-                  : 'text-neutral-600 hover:text-neutral-900 hover:bg-neutral-200/60'
+                  ? 'bg-emerald-500 text-white shadow-2xs'
+                  : 'text-white/70 hover:text-white hover:bg-white/10'
               }`}
             >
               <TableIcon className="w-2.5 h-2.5" />
-              <span>إكسل (Excel)</span>
+              <span>إكسل</span>
             </button>
           </div>
         </div>
@@ -131,34 +140,30 @@ export const HeaderNav: React.FC<HeaderNavProps> = ({
             type="text"
             value={title}
             onChange={(e) => onTitleChange(e.target.value)}
-            className="w-full text-center text-[10px] font-semibold text-neutral-800 bg-neutral-50 hover:bg-neutral-100 focus:bg-white border border-neutral-200 focus:border-blue-500 rounded px-1.5 h-4 transition-colors outline-hidden truncate"
+            className="w-full text-center text-[10px] font-semibold text-white bg-white/10 hover:bg-white/20 focus:bg-white focus:text-neutral-900 border border-white/20 rounded px-1.5 h-4 transition-colors outline-hidden truncate"
             title="انقر لتعديل اسم المستند"
           />
           <div 
             id="header-auto-save-indicator"
-            className={`flex items-center gap-1 px-1.5 py-0 h-4 rounded border text-[9px] font-semibold whitespace-nowrap transition-all select-none leading-none ${
-              isSaving 
-                ? 'bg-amber-50 text-amber-700 border-amber-300 shadow-2xs' 
-                : 'bg-emerald-50 text-emerald-700 border-emerald-300'
-            }`} 
+            className="flex items-center gap-1 px-1.5 py-0 h-4 rounded text-[9px] font-medium whitespace-nowrap transition-all select-none leading-none bg-white/10 text-emerald-300 border border-white/15" 
             title={isSaving ? 'جاري الحفظ التلقائي...' : 'تم الحفظ تلقائياً في المتصفح'}
           >
             {isSaving ? (
               <>
-                <Loader2 className="w-2.5 h-2.5 text-amber-600 animate-spin shrink-0" />
-                <span className="hidden sm:inline">جاري الحفظ...</span>
+                <Loader2 className="w-2.5 h-2.5 text-amber-300 animate-spin shrink-0" />
+                <span className="hidden sm:inline text-amber-200">جاري الحفظ...</span>
               </>
             ) : (
               <>
-                <CheckCircle2 className="w-2.5 h-2.5 text-emerald-600 shrink-0" />
-                <span className="hidden sm:inline">تم الحفظ</span>
+                <CheckCircle2 className="w-2.5 h-2.5 text-emerald-400 shrink-0" />
+                <span className="hidden sm:inline">محفوظ تلقائياً (Room)</span>
               </>
             )}
           </div>
         </div>
 
         {/* Right Side: Document Actions */}
-        <div className="flex items-center gap-0.5 shrink-0">
+        <div className="flex items-center gap-0.5 shrink-0 text-white/90">
           {/* Undo / Redo */}
           {onUndo && (
             <button
@@ -166,7 +171,7 @@ export const HeaderNav: React.FC<HeaderNavProps> = ({
               onClick={onUndo}
               disabled={!canUndo}
               title="تراجع (Ctrl+Z)"
-              className="p-0.5 text-neutral-600 hover:bg-neutral-100 disabled:opacity-30 rounded h-4 w-4 flex items-center justify-center transition-colors"
+              className="p-0.5 text-white/80 hover:text-white hover:bg-white/10 disabled:opacity-30 rounded h-4 w-4 flex items-center justify-center transition-colors cursor-pointer"
             >
               <Undo className="w-2.5 h-2.5" />
             </button>
@@ -177,22 +182,22 @@ export const HeaderNav: React.FC<HeaderNavProps> = ({
               onClick={onRedo}
               disabled={!canRedo}
               title="إعادة (Ctrl+Y)"
-              className="p-0.5 text-neutral-600 hover:bg-neutral-100 disabled:opacity-30 rounded h-4 w-4 flex items-center justify-center transition-colors"
+              className="p-0.5 text-white/80 hover:text-white hover:bg-white/10 disabled:opacity-30 rounded h-4 w-4 flex items-center justify-center transition-colors cursor-pointer"
             >
               <Redo className="w-2.5 h-2.5" />
             </button>
           )}
 
-          <div className="h-3 w-px bg-neutral-200 mx-0.5" />
+          <div className="h-3 w-px bg-white/20 mx-0.5" />
 
           {/* Templates library */}
           <button
             id="open-templates-btn"
             onClick={onOpenTemplates}
-            className="flex items-center gap-1 px-1.5 py-0 h-4 text-[10px] font-medium text-neutral-700 bg-neutral-100 hover:bg-neutral-200 border border-neutral-300 rounded transition-colors leading-none"
+            className="flex items-center gap-1 px-1.5 py-0 h-4 text-[10px] font-medium text-white bg-white/10 hover:bg-white/20 border border-white/20 rounded transition-colors leading-none cursor-pointer"
             title="عرض وتطبيق النماذج الجاهزة"
           >
-            <FolderOpen className="w-2.5 h-2.5 text-neutral-600" />
+            <FolderOpen className="w-2.5 h-2.5 text-white/90" />
             <span className="hidden md:inline">نماذج</span>
           </button>
 
@@ -200,10 +205,10 @@ export const HeaderNav: React.FC<HeaderNavProps> = ({
           <button
             id="import-file-btn"
             onClick={onImportClick}
-            className="flex items-center gap-1 px-1.5 py-0 h-4 text-[10px] font-medium text-neutral-700 bg-neutral-100 hover:bg-neutral-200 border border-neutral-300 rounded transition-colors leading-none"
+            className="flex items-center gap-1 px-1.5 py-0 h-4 text-[10px] font-medium text-white bg-white/10 hover:bg-white/20 border border-white/20 rounded transition-colors leading-none cursor-pointer"
             title={mode === 'word' ? 'فتح ملف Word (.docx, .txt)' : 'فتح ملف Excel (.xlsx, .csv)'}
           >
-            <Upload className="w-2.5 h-2.5 text-neutral-600" />
+            <Upload className="w-2.5 h-2.5 text-white/90" />
             <span className="hidden md:inline">فتح</span>
           </button>
 
@@ -211,7 +216,7 @@ export const HeaderNav: React.FC<HeaderNavProps> = ({
           <button
             id="print-btn"
             onClick={onPrint}
-            className="p-0.5 text-neutral-600 hover:bg-neutral-100 rounded h-4 w-4 flex items-center justify-center transition-colors"
+            className="p-0.5 text-white/80 hover:text-white hover:bg-white/10 rounded h-4 w-4 flex items-center justify-center transition-colors cursor-pointer"
             title="طباعة / تصدير PDF"
           >
             <Printer className="w-2.5 h-2.5" />
@@ -221,7 +226,7 @@ export const HeaderNav: React.FC<HeaderNavProps> = ({
           <button
             id="quick-save-btn"
             onClick={onSave}
-            className="p-0.5 text-neutral-600 hover:bg-neutral-100 rounded h-4 w-4 flex items-center justify-center transition-colors"
+            className="p-0.5 text-white/80 hover:text-white hover:bg-white/10 rounded h-4 w-4 flex items-center justify-center transition-colors cursor-pointer"
             title="حفظ محلي فوري"
           >
             <Save className="w-2.5 h-2.5" />
@@ -232,10 +237,10 @@ export const HeaderNav: React.FC<HeaderNavProps> = ({
             <button
               id="toggle-virtual-keyboard-btn"
               onClick={onToggleKeyboard}
-              className={`flex items-center gap-1 px-1.5 py-0 h-4 text-[10px] font-bold rounded border transition-all leading-none ${
+              className={`flex items-center gap-1 px-1.5 py-0 h-4 text-[10px] font-bold rounded border transition-all leading-none cursor-pointer ${
                 isKeyboardOpen
-                  ? 'bg-cyan-600 text-white border-cyan-700 shadow-2xs'
-                  : 'bg-neutral-100 hover:bg-neutral-200 text-neutral-800 border-neutral-300'
+                  ? 'bg-cyan-600 text-white border-cyan-400 shadow-2xs'
+                  : 'bg-white/10 hover:bg-white/20 text-white border-white/20'
               }`}
               title="لوحة المفاتيح الملحقة (كيبورد عربي مع Shift, Ctrl, Alt)"
             >
