@@ -1,0 +1,6 @@
+{
+  "name": "Office Suite - Word & Excel Editor",
+  "description": "محرر ومعالج متكامل لمستندات وورد (DOCX) وجداول بيانات إكسيل (XLSX) مع قوالب احترافية وتصدير وطباعة ودعم كامل للعربية.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
