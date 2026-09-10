@@ -363,7 +363,7 @@ export const WordEditor: React.FC<WordEditorProps> = ({
   const handleAddRowBelow = () => {
     const { tr, table } = getParentTableCell();
     if (!tr || !table) return;
-    const numCols = tr.cells.length;
+    const numCols = tr.cells ? tr.cells.length : (table.rows[0]?.cells?.length || 2);
     const newTr = table.insertRow(tr.rowIndex + 1);
     newTr.style.backgroundColor = '#ffffff';
     for (let i = 0; i < numCols; i++) {

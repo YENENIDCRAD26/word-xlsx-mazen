@@ -89,17 +89,26 @@ export const ExcelEditor: React.FC<ExcelEditorProps> = ({
   const [miniFillPickerOpen, setMiniFillPickerOpen] = useState(false);
   const [miniTextPickerOpen, setMiniTextPickerOpen] = useState(false);
 
-  // Active sheet
+  // Active sheet with fallback and safe cells guarantee
   const activeSheet = useMemo(() => {
-    return workbook.sheets.find(s => s.id === workbook.activeSheetId) || workbook.sheets[0] || createEmptySheet('ورقة 1');
+    const fallbackSheet = createEmptySheet('ورقة 1');
+    if (!workbook || !Array.isArray(workbook.sheets) || workbook.sheets.length === 0) {
+      return fallbackSheet;
+    }
+    const found = workbook.sheets.find(s => s && s.id === workbook.activeSheetId) || workbook.sheets[0];
+    if (!found) return fallbackSheet;
+    return {
+      ...found,
+      cells: found.cells && typeof found.cells === 'object' ? found.cells : {},
+    };
   }, [workbook]);
 
   // Selected cell data
-  const selectedCell = activeSheet.cells[selectedCellId];
+  const selectedCell = activeSheet?.cells ? activeSheet.cells[selectedCellId] : undefined;
 
   // Sync formula input with selected cell
   useEffect(() => {
-    const val = activeSheet.cells[selectedCellId]?.value || '';
+    const val = activeSheet?.cells?.[selectedCellId]?.value || '';
     setFormulaInputVal(val);
     setIsEditingCell(false);
   }, [selectedCellId, activeSheet]);
@@ -1326,11 +1335,14 @@ export const ExcelEditor: React.FC<ExcelEditorProps> = ({
       </div>
 
       {/* Chart Modal */}
-      <ChartModal
-        isOpen={showChartModal}
-        onClose={() => setShowChartModal(false)}
-        cells={activeSheet.cells}
-      />
+      {showChartModal && (
+        <ChartModal
+          isOpen={showChartModal}
+          sheet={activeSheet}
+          cells={activeSheet?.cells || {}}
+          onClose={() => setShowChartModal(false)}
+        />
+      )}
     </div>
   );
 };

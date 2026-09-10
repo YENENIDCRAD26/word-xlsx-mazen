@@ -24,11 +24,13 @@ import {
   Tooltip,
   Legend
 } from 'recharts';
-import { SheetData } from '../../types';
+import { SheetData, CellData } from '../../types';
 import { evaluateFormula } from '../../utils/excelEngine';
 
 interface ChartModalProps {
-  sheet: SheetData;
+  isOpen?: boolean;
+  sheet?: SheetData;
+  cells?: Record<string, CellData>;
   onClose: () => void;
 }
 
@@ -53,7 +55,7 @@ const COLOR_PALETTES: Record<string, { name: string; colors: string[] }> = {
   },
 };
 
-export const ChartModal: React.FC<ChartModalProps> = ({ sheet, onClose }) => {
+export const ChartModal: React.FC<ChartModalProps> = ({ isOpen, sheet, cells, onClose }) => {
   const [chartType, setChartType] = useState<ChartType>('bar');
   const [labelCol, setLabelCol] = useState('B');
   const [valueCol, setValueCol] = useState('D');
@@ -63,26 +65,28 @@ export const ChartModal: React.FC<ChartModalProps> = ({ sheet, onClose }) => {
   const [chartTitle, setChartTitle] = useState('تحليل ومخطط بياني للبيانات');
 
   const activePalette = COLOR_PALETTES[paletteKey].colors;
+  const sheetCells = sheet?.cells || cells || {};
 
   // Extract data based on user configuration
   const dataPoints = useMemo(() => {
     const points: { label: string; value: number }[] = [];
+    if (!sheetCells || typeof sheetCells !== 'object') return points;
     for (let r = startRow; r <= endRow; r++) {
-      const labelCell = sheet.cells[`${labelCol}${r}`];
-      const valCell = sheet.cells[`${valueCol}${r}`];
+      const labelCell = sheetCells[`${labelCol}${r}`];
+      const valCell = sheetCells[`${valueCol}${r}`];
       if (labelCell && valCell) {
         const label = (labelCell.displayValue || labelCell.value || '').trim();
-        const rawVal = valCell.value.startsWith('=')
-          ? evaluateFormula(valCell.value, sheet.cells)
-          : valCell.value;
-        const num = parseFloat(rawVal.replace(/[,]/g, ''));
+        const rawVal = valCell.value?.startsWith?.('=')
+          ? evaluateFormula(valCell.value, sheetCells)
+          : valCell.value || '';
+        const num = parseFloat(String(rawVal).replace(/[,]/g, ''));
         if (label && !isNaN(num) && num > 0) {
           points.push({ label, value: num });
         }
       }
     }
     return points;
-  }, [sheet, labelCol, valueCol, startRow, endRow]);
+  }, [sheetCells, labelCol, valueCol, startRow, endRow]);
 
   const { totalSum, average, maxValue, minValue } = useMemo(() => {
     if (!dataPoints.length) return { totalSum: 0, average: 0, maxValue: 0, minValue: 0 };
@@ -95,6 +99,10 @@ export const ChartModal: React.FC<ChartModalProps> = ({ sheet, onClose }) => {
       minValue: Math.min(...values),
     };
   }, [dataPoints]);
+
+  if (isOpen !== undefined && !isOpen) {
+    return null;
+  }
 
   return (
     <div className="fixed inset-0 bg-black/50 backdrop-blur-xs flex items-center justify-center p-4 z-50 animate-in fade-in duration-200">

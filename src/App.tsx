@@ -57,7 +57,21 @@ export default function App() {
   const [workbook, setWorkbook] = useState<WorkbookState>(() => {
     try {
       const saved = localStorage.getItem(STORAGE_KEY_EXCEL);
-      if (saved) return JSON.parse(saved);
+      if (saved) {
+        const parsed = JSON.parse(saved);
+        if (parsed && Array.isArray(parsed.sheets) && parsed.sheets.length > 0) {
+          // Guard each sheet against missing cells
+          const sanitizedSheets = parsed.sheets.map((s: any) => ({
+            ...s,
+            cells: s && typeof s.cells === 'object' && s.cells !== null ? s.cells : {},
+          }));
+          return {
+            ...parsed,
+            sheets: sanitizedSheets,
+            activeSheetId: parsed.activeSheetId || sanitizedSheets[0].id,
+          };
+        }
+      }
     } catch (e) {
       console.warn('Could not load saved excel wb:', e);
     }
