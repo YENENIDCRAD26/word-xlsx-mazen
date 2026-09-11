@@ -1,5 +1,5 @@
 import jsPDF from 'jspdf';
-import html2canvas from 'html2canvas';
+import html2canvas from 'html2canvas-pro';
 import { WorkbookState } from '../types';
 
 /**
@@ -22,6 +22,12 @@ export async function exportElementToPdf(
       allowTaint: true,
       backgroundColor: '#ffffff',
       windowWidth: element.scrollWidth,
+      onclone: (_clonedDoc, clonedElement) => {
+        if (clonedElement instanceof HTMLElement) {
+          clonedElement.style.transform = 'none';
+          clonedElement.style.boxShadow = 'none';
+        }
+      },
     });
 
     const imgData = canvas.toDataURL('image/png');
