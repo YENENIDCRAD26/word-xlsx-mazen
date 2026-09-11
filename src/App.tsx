@@ -351,23 +351,38 @@ export default function App() {
         document.execCommand('insertText', false, key);
       }
     } else {
-      // Excel mode: send to active input if focused, or update formula bar
-      const activeInput = document.getElementById('formula-bar-input') as HTMLInputElement | null;
-      if (activeInput) {
+      // Excel mode: send to active focused element if input/textarea, or default to formula-bar-input
+      const activeElement = document.activeElement;
+      const targetInput = (activeElement instanceof HTMLInputElement || activeElement instanceof HTMLTextAreaElement)
+        ? activeElement
+        : (document.getElementById('formula-bar-input') as HTMLInputElement | null);
+
+      if (targetInput) {
         if (isAction) {
           if (key === 'Backspace') {
-            activeInput.value = activeInput.value.slice(0, -1);
-            activeInput.dispatchEvent(new Event('input', { bubbles: true }));
+            const start = targetInput.selectionStart ?? targetInput.value.length;
+            const end = targetInput.selectionEnd ?? targetInput.value.length;
+            if (start === end && start > 0) {
+              targetInput.value = targetInput.value.slice(0, start - 1) + targetInput.value.slice(end);
+              targetInput.setSelectionRange(start - 1, start - 1);
+            } else if (start !== end) {
+              targetInput.value = targetInput.value.slice(0, start) + targetInput.value.slice(end);
+              targetInput.setSelectionRange(start, start);
+            }
+            targetInput.dispatchEvent(new Event('input', { bubbles: true }));
           } else if (key === 'Enter') {
-            activeInput.dispatchEvent(new KeyboardEvent('keydown', { key: 'Enter', bubbles: true }));
+            targetInput.dispatchEvent(new KeyboardEvent('keydown', { key: 'Enter', code: 'Enter', bubbles: true }));
+            targetInput.dispatchEvent(new Event('change', { bubbles: true }));
+          } else if (key === 'Tab') {
+            targetInput.dispatchEvent(new KeyboardEvent('keydown', { key: 'Tab', code: 'Tab', bubbles: true }));
           }
         } else {
-          const start = activeInput.selectionStart || activeInput.value.length;
-          const end = activeInput.selectionEnd || activeInput.value.length;
-          const val = activeInput.value;
-          activeInput.value = val.slice(0, start) + key + val.slice(end);
-          activeInput.setSelectionRange(start + key.length, start + key.length);
-          activeInput.dispatchEvent(new Event('input', { bubbles: true }));
+          const start = targetInput.selectionStart ?? targetInput.value.length;
+          const end = targetInput.selectionEnd ?? targetInput.value.length;
+          const val = targetInput.value;
+          targetInput.value = val.slice(0, start) + key + val.slice(end);
+          targetInput.setSelectionRange(start + key.length, start + key.length);
+          targetInput.dispatchEvent(new Event('input', { bubbles: true }));
         }
       }
     }
@@ -440,11 +455,12 @@ export default function App() {
         )}
       </main>
 
-      {/* Arabic Virtual Keyboard Overlay */}
+      {/* Arabic and English Virtual Keyboard Overlay */}
       <ArabicVirtualKeyboard
         isOpen={isKeyboardOpen}
         onClose={() => setIsKeyboardOpen(false)}
         onKeyPress={handleVirtualKeyPress}
+        targetEditorName={mode === 'word' ? 'محرر النصوص Word' : 'معالج الجداول Excel'}
       />
 
       {/* Templates Library Modal */}
