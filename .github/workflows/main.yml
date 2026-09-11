@@ -1,87 +1,93 @@
-name: Android Clean Build CI
+name: Build & Release Android APK
 
 on:
   push:
     branches: [ "main", "master" ]
   pull_request:
     branches: [ "main", "master" ]
+  workflow_dispatch:
+
+permissions:
+  contents: write
 
 jobs:
   build:
+    name: Build Web Assets & Android APK
     runs-on: ubuntu-latest
-    timeout-minutes: 60
+    timeout-minutes: 45
 
     steps:
-      - name: Checkout code
+      - name: Checkout Code
         uses: actions/checkout@v4
 
-      - name: Setup Java
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: 'npm'
+
+      - name: Setup Java JDK 21
         uses: actions/setup-java@v4
         with:
           java-version: '21'
           distribution: 'temurin'
 
-      - name: Clean everything
-        run: |
-          rm -rf ~/.gradle
-          rm -rf .gradle
-          rm -rf build
-          rm -rf app/build
+      - name: Setup Android SDK
+        uses: android-actions/setup-android@v3
 
-      - name: Ensure google-services.json
+      - name: Install NPM Dependencies
+        run: npm install
+
+      - name: Build Web Application
+        run: npm run build
+
+      - name: Sync Capacitor Android
         run: |
-          mkdir -p app
-          if [ ! -f app/google-services.json ] || grep -q "service_account" app/google-services.json; then
-            cat > app/google-services.json <<'EOF'
-          {
-            "project_info": {
-              "project_number": "123456789012",
-              "project_id": "document-editor-app",
-              "storage_bucket": "document-editor-app.appspot.com"
-            },
-            "client": [
-              {
-                "client_info": {
-                  "mobilesdk_app_id": "1:123456789012:android:1234567890abcdef",
-                  "android_client_info": {
-                    "package_name": "com.aistudio.documenteditor.abxzw2"
-                  }
-                },
-                "oauth_client": [],
-                "api_key": [
-                  {
-                    "current_key": "AIzaSyDummyKeyForGoogleServicesValidation123"
-                  }
-                ],
-                "services": {
-                  "appinvite_service": {
-                    "other_platform_oauth_client": []
-                  }
-                }
-              }
-            ],
-            "configuration_version": "1"
-          }
-          EOF
+          npx cap sync android
+
+      - name: Grant Execute Permission to Gradlew
+        run: |
+          if [ -f android/gradlew ]; then
+            chmod +x android/gradlew
+          fi
+          if [ -f gradlew ]; then
+            chmod +x gradlew
           fi
 
-      - name: Grant execute permission
-        run: chmod +x gradlew
-
-      - name: Build APK
+      - name: Build Android APK (assembleDebug)
         env:
           JAVA_OPTS: "-Djava.awt.headless=true -Xmx2048m"
           GRADLE_OPTS: "-Djava.awt.headless=true -Dorg.gradle.daemon=false"
-        run: ./gradlew assembleDebug --stacktrace -Djava.awt.headless=true -Pksp.incremental=false
+        run: |
+          cd android
+          ./gradlew assembleDebug --stacktrace -Dorg.gradle.daemon=false
 
-      - name: Upload APK
-        if: success()
+      - name: Prepare APK Outputs
+        run: |
+          mkdir -p build-artifacts
+          if [ -f android/app/build/outputs/apk/debug/app-debug.apk ]; then
+            cp android/app/build/outputs/apk/debug/app-debug.apk build-artifacts/Word-Excel-Suite.apk
+          fi
+
+      - name: Upload APK Artifact
         uses: actions/upload-artifact@v4
         with:
-          name: app-debug-apk
-          path: app/build/outputs/apk/debug/app-debug.apk
-          retention-days: 7
+          name: Word-Excel-Suite-APK
+          path: build-artifacts/Word-Excel-Suite.apk
+          retention-days: 30
 
-      - name: Build Success
-        if: success()
-        run: echo "✅ Build succeeded! APK ready."
+      - name: Upload Web Build (HTML/JS/CSS)
+        uses: actions/upload-artifact@v4
+        with:
+          name: web-dist
+          path: dist/
+          retention-days: 30
+
+      - name: Build Success Notification
+        run: |
+          echo "=========================================================="
+          echo "✅ Build completed successfully!"
+          echo "📱 Android APK file: build-artifacts/Word-Excel-Suite.apk"
+          echo "🌐 Web assets built into dist/"
+          echo "Download the APK directly from the Artifacts section in this run!"
+          echo "=========================================================="
