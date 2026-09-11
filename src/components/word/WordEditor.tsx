@@ -64,6 +64,12 @@ interface WordEditorProps {
   isKeyboardOpen?: boolean;
   saveStatus?: 'saving' | 'saved';
   onExportPdf?: () => void;
+  onNewDocument?: () => void;
+  onOpenFile?: () => void;
+  onSaveFile?: () => void;
+  onExportDocx?: () => void;
+  onPrint?: () => void;
+  onShare?: () => void;
 }
 
 export const ARABIC_FONTS = [
@@ -91,6 +97,12 @@ export const WordEditor: React.FC<WordEditorProps> = ({
   isKeyboardOpen = false,
   saveStatus = 'saved',
   onExportPdf,
+  onNewDocument,
+  onOpenFile,
+  onSaveFile,
+  onExportDocx,
+  onPrint,
+  onShare,
 }) => {
   const [fontFamily, setFontFamily] = useState(documentState.fontFamily || 'Cairo');
   const [fontSize, setFontSize] = useState(documentState.fontSize || '14');
@@ -528,30 +540,89 @@ export const WordEditor: React.FC<WordEditorProps> = ({
         saveStatus={saveStatus}
         saveSelection={saveSelection}
         restoreSelection={restoreSelection}
+        onNewDocument={onNewDocument}
+        onOpenFile={onOpenFile}
+        onSaveFile={onSaveFile}
+        onExportDocx={onExportDocx}
+        onPrint={onPrint}
+        onShare={onShare}
+        zoom={zoom}
+        onZoomChange={setZoom}
       />
 
+      {/* Read-Only Mode Banner */}
+      {documentState.readOnly && (
+        <div className="bg-amber-500/10 border-b border-amber-300 px-4 py-1.5 text-xs text-amber-900 font-medium flex items-center justify-between z-20">
+          <span className="flex items-center gap-1.5">
+            <span>🔒</span>
+            <span>وضع القراءة فقط: تم تأمين المستند ضد التعديلات غير المقصودة.</span>
+          </span>
+          <button
+            onClick={() => onChange({ ...documentState, readOnly: false })}
+            className="text-[11px] bg-amber-600 hover:bg-amber-700 text-white px-2.5 py-0.5 rounded cursor-pointer transition-colors"
+          >
+            إلغاء القفل والتحرير
+          </button>
+        </div>
+      )}
+
       {/* Main Canvas Scroll Area with Realistic Printable Sheet Margin */}
-      <div className="flex-1 overflow-y-auto overflow-x-auto p-4 md:p-8 flex justify-center items-start">
+      <div className="flex-1 overflow-y-auto overflow-x-auto p-4 md:p-8 flex flex-col items-center justify-start">
+        {/* Optional Visual Ruler */}
+        {documentState.showRuler && (
+          <div
+            style={{ width: documentState.orientation === 'landscape' ? '297mm' : '210mm', transform: `scale(${zoom / 100})`, transformOrigin: 'top center' }}
+            className="h-5 bg-neutral-200 border-x border-t border-neutral-300 flex items-end text-[8px] text-neutral-500 select-none overflow-hidden px-1"
+          >
+            {Array.from({ length: 30 }).map((_, i) => (
+              <div key={i} className="flex-1 border-r border-neutral-400 h-2 flex items-start justify-center">
+                {i % 2 === 0 && <span>{i}</span>}
+              </div>
+            ))}
+          </div>
+        )}
+
         {/* The Paper Sheet Container */}
         <div
           style={{
-            width: '210mm',
-            minHeight: '297mm',
+            width: documentState.orientation === 'landscape'
+              ? (documentState.paperSize === 'Letter' ? '279.4mm' : documentState.paperSize === 'A3' ? '420mm' : documentState.paperSize === 'A5' ? '210mm' : '297mm')
+              : (documentState.paperSize === 'Letter' ? '215.9mm' : documentState.paperSize === 'A3' ? '297mm' : documentState.paperSize === 'A5' ? '148mm' : '210mm'),
+            minHeight: documentState.continuousScroll ? 'auto' : (documentState.orientation === 'landscape' ? '210mm' : '297mm'),
             transform: `scale(${zoom / 100})`,
             transformOrigin: 'top center',
+            backgroundColor: documentState.pageColor || '#ffffff',
           }}
-          className="bg-white shadow-2xl rounded-sm transition-transform duration-150 relative border border-neutral-300/80 mb-12"
+          className={`shadow-2xl rounded-sm transition-all duration-150 relative mb-12 ${
+            documentState.pageBorder === 'double' ? 'border-4 border-double border-neutral-700' :
+            documentState.pageBorder === 'thick' ? 'border-4 border-solid border-neutral-800' :
+            documentState.pageBorder === 'ornate' ? 'border-8 border-ridge border-amber-900' :
+            documentState.pageBorder === 'simple' ? 'border border-neutral-400' :
+            documentState.pageBorder === 'none' ? 'border-0 shadow-none' :
+            'border border-neutral-300/80'
+          }`}
         >
+          {/* Watermark Diagonal Overlay */}
+          {documentState.watermark && (
+            <div className="absolute inset-0 flex items-center justify-center pointer-events-none select-none z-10 overflow-hidden">
+              <span className="text-neutral-400/25 text-7xl font-black rotate-[-35deg] tracking-widest uppercase text-center max-w-[85%] select-none">
+                {documentState.watermark}
+              </span>
+            </div>
+          )}
+
           {/* Print Watermark or Header Margin Marker */}
-          <div className="h-8 border-b border-neutral-100 flex items-center justify-between px-12 text-[10px] text-neutral-400 select-none">
-            <span>مستند رسمي - محرر وورد أوفيس برو</span>
-            <span>صفحة {stats.pages}</span>
-          </div>
+          {documentState.showHeaderFooter !== false && (
+            <div className="h-8 border-b border-neutral-100 flex items-center justify-between px-12 text-[10px] text-neutral-400 select-none">
+              <span>مستند رسمي - محرر وورد أوفيس برو</span>
+              <span>صفحة {stats.pages}</span>
+            </div>
+          )}
 
           {/* Content Editable Area */}
           <div
             ref={editorRef}
-            contentEditable
+            contentEditable={!documentState.readOnly}
             suppressContentEditableWarning
             onInput={handleInput}
             onKeyUp={() => {
@@ -566,17 +637,27 @@ export const WordEditor: React.FC<WordEditorProps> = ({
             style={{
               fontFamily: ARABIC_FONTS.find(f => f.id === fontFamily)?.font || fontFamily,
               fontSize: `${fontSize}pt`,
-              lineHeight: '1.8',
+              lineHeight: documentState.lineSpacing || '1.8',
               minHeight: '270mm',
+              columnCount: documentState.columns || 1,
+              columnGap: '28px',
+              columnRule: (documentState.columns && documentState.columns > 1) ? '1px dashed #cbd5e1' : 'none',
             }}
-            className="p-12 md:p-16 focus:outline-hidden text-neutral-900 leading-relaxed text-right dir-rtl document-print-content"
+            className={`focus:outline-hidden text-neutral-900 text-right dir-rtl document-print-content ${
+              documentState.margins === 'narrow' ? 'p-6 md:p-8' :
+              documentState.margins === 'wide' ? 'p-16 md:p-24' :
+              documentState.margins === 'moderate' ? 'p-8 md:p-12' :
+              'p-12 md:p-16'
+            }`}
           />
 
           {/* Print Footer Margin Marker */}
-          <div className="h-8 border-t border-neutral-100 flex items-center justify-between px-12 text-[10px] text-neutral-400 select-none">
-            <span>حرر بواسطة منصة التطبيقات الذكية</span>
-            <span>{stats.words} كلمة</span>
-          </div>
+          {documentState.showHeaderFooter !== false && (
+            <div className="h-8 border-t border-neutral-100 flex items-center justify-between px-12 text-[10px] text-neutral-400 select-none">
+              <span>حرر بواسطة منصة التطبيقات الذكية</span>
+              <span>{stats.words} كلمة</span>
+            </div>
+          )}
         </div>
       </div>
 

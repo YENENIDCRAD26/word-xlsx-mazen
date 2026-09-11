@@ -6,11 +6,23 @@ export interface DocumentState {
   contentHtml: string;
   fontFamily: string;
   fontSize: string;
-  paperSize: 'A4' | 'Letter';
+  paperSize: 'A4' | 'Letter' | 'Legal' | 'A3' | 'A5' | string;
   orientation: 'portrait' | 'landscape';
-  margins: 'normal' | 'narrow' | 'wide';
+  margins: 'normal' | 'narrow' | 'moderate' | 'wide' | string;
   zoom: number; // percentage, e.g. 100
   lastModified: number;
+  pageColor?: string;
+  watermark?: string;
+  pageBorder?: 'none' | 'simple' | 'double' | 'thick' | 'ornate' | string;
+  columns?: number;
+  lineNumbers?: boolean;
+  lineSpacing?: string;
+  readOnly?: boolean;
+  continuousScroll?: boolean;
+  showRuler?: boolean;
+  showHeaderFooter?: boolean;
+  showPageBorders?: boolean;
+  theme?: string;
 }
 
 export interface CellStyle {

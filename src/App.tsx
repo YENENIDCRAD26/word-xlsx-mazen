@@ -277,6 +277,29 @@ export default function App() {
     showToast('تم إنشاء مستند فارغ جديد.');
   };
 
+  // Handle Share document
+  const handleShare = async () => {
+    if (navigator.share) {
+      try {
+        await navigator.share({
+          title: mode === 'word' ? wordDoc.title : workbook.title,
+          text: `مستند: ${mode === 'word' ? wordDoc.title : workbook.title}`,
+          url: window.location.href,
+        });
+        showToast('تمت مشاركة الرابط بنجاح!');
+      } catch {
+        // User dismissed
+      }
+    } else {
+      try {
+        await navigator.clipboard.writeText(window.location.href);
+        showToast('تم نسخ رابط المستند إلى الحافظة بنجاح!');
+      } catch {
+        showToast('رابط المستند جاهز للمشاركة.');
+      }
+    }
+  };
+
   // Select Word template
   const handleSelectWordTemplate = (tpl: TemplateItem) => {
     setMode('word');
@@ -397,6 +420,12 @@ export default function App() {
             isKeyboardOpen={isKeyboardOpen}
             saveStatus={saveStatus}
             onExportPdf={handleExportPdf}
+            onNewDocument={handleReset}
+            onOpenFile={handleImportClick}
+            onSaveFile={handleSave}
+            onExportDocx={handleExport}
+            onPrint={handlePrint}
+            onShare={handleShare}
           />
         ) : (
           <ExcelEditor
