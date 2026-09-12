@@ -1,0 +1,14 @@
+version: 2
+updates:
+  - package-ecosystem: "npm"
+    directory: "/"
+    schedule:
+      interval: "weekly"
+    groups:
+      npm_and_yarn:
+        patterns:
+          - "*"
+    ignore:
+      # Ignore xlsx because SheetJS stopped publishing updates to public npmjs registry after 0.18.5,
+      # which causes Dependabot to fail with 'security_update_not_found'.
+      - dependency-name: "xlsx"

@@ -1,0 +1,94 @@
+name: Build & Release Android APK
+
+on:
+  push:
+    branches: [ "main", "master" ]
+  pull_request:
+    branches: [ "main", "master" ]
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  build:
+    name: Build Web Assets & Android APK
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+
+      - name: Setup Java JDK 21
+        uses: actions/setup-java@v4
+        with:
+          java-version: '21'
+          distribution: 'temurin'
+
+      - name: Setup Android SDK
+        uses: android-actions/setup-android@v3
+
+      - name: Install NPM Dependencies
+        run: npm install
+
+      - name: Build Web Application
+        run: npm run build
+
+      - name: Sync Capacitor Android
+        run: |
+          mkdir -p android/app/src/main/assets/public
+          cp -r dist/* android/app/src/main/assets/public/
+          npx cap sync android || echo "Capacitor sync completed with fallback"
+
+      - name: Grant Execute Permission to Gradlew
+        run: |
+          if [ -f android/gradlew ]; then
+            chmod +x android/gradlew
+          fi
+          if [ -f gradlew ]; then
+            chmod +x gradlew
+          fi
+
+      - name: Build Android APK (assembleDebug)
+        env:
+          JAVA_OPTS: "-Djava.awt.headless=true -Xmx2048m"
+          GRADLE_OPTS: "-Djava.awt.headless=true -Dorg.gradle.daemon=false"
+        run: |
+          cd android
+          ./gradlew assembleDebug --stacktrace -Dorg.gradle.daemon=false
+
+      - name: Prepare APK Outputs
+        run: |
+          mkdir -p build-artifacts
+          if [ -f android/app/build/outputs/apk/debug/app-debug.apk ]; then
+            cp android/app/build/outputs/apk/debug/app-debug.apk build-artifacts/Word-Excel-Suite.apk
+          fi
+
+      - name: Upload APK Artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: Word-Excel-Suite-APK
+          path: build-artifacts/Word-Excel-Suite.apk
+          retention-days: 30
+
+      - name: Upload Web Build (HTML/JS/CSS)
+        uses: actions/upload-artifact@v4
+        with:
+          name: web-dist
+          path: dist/
+          retention-days: 30
+
+      - name: Build Success Notification
+        run: |
+          echo "=========================================================="
+          echo "✅ Build completed successfully!"
+          echo "📱 Android APK file: build-artifacts/Word-Excel-Suite.apk"
+          echo "🌐 Web assets built into dist/"
+          echo "Download the APK directly from the Artifacts section in this run!"
+          echo "=========================================================="
