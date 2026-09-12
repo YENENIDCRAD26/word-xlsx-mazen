@@ -73,52 +73,51 @@ export const TopHeader: React.FC<TopHeaderProps> = ({
   };
 
   return (
-    <header className="bg-slate-900 text-white border-b border-slate-800 select-none shadow-md no-print sticky top-0 z-40">
-      {/* Top Main Navigation Bar */}
-      <div className="flex items-center justify-between px-3 py-1.5 gap-2">
-        {/* Left Section: Suite Mode Switcher & Title */}
-        <div className="flex items-center gap-2 sm:gap-3 flex-wrap">
+    <header className="bg-[#1e293b] text-white border-b border-slate-700/80 select-none shadow-xs no-print sticky top-0 z-40 h-[28px] max-h-[28px] flex items-center">
+      {/* Top Main Navigation Bar - Single Line (0.5cm) */}
+      <div className="w-full flex items-center justify-between px-2 gap-1.5 overflow-x-auto overflow-y-hidden text-[11px]">
+        {/* Right Section: Suite Mode Switcher, Title & Room Cloud Status */}
+        <div className="flex items-center gap-1.5 shrink-0">
+          {/* Official Suite PRO Badge */}
+          <div className="flex items-center bg-[#1e3a8a] text-white rounded px-1.5 py-0.5 text-[10px] font-bold border border-blue-400/40 shadow-xs">
+            <span className="text-amber-400 font-black ml-1 text-[9px]">PRO</span>
+            <span className="ml-1 text-slate-100 font-semibold">{mode === 'word' ? 'Word' : 'Excel'}</span>
+            <span className="w-3.5 h-3.5 rounded bg-blue-500 text-white font-black flex items-center justify-center text-[9px]">
+              {mode === 'word' ? 'W' : 'X'}
+            </span>
+          </div>
+
           {/* Word Switcher Tab */}
           <button
             id="mode-switch-word"
             onClick={() => onSelectMode('word')}
-            className={`flex items-center gap-1.5 px-3 py-1 rounded-md text-xs sm:text-sm font-bold transition-all ${
+            className={`flex items-center gap-1 px-2 py-0.5 rounded text-[11px] font-bold transition-all ${
               mode === 'word'
-                ? 'bg-blue-600 text-white shadow-sm ring-1 ring-blue-400'
+                ? 'bg-[#2563eb] text-white shadow-xs ring-1 ring-blue-300'
                 : 'bg-slate-800 text-slate-300 hover:bg-slate-700 hover:text-white'
             }`}
           >
-            <div className="w-5 h-5 rounded bg-blue-700 flex items-center justify-center text-white text-[11px] font-black border border-blue-400">
-              W
-            </div>
-            <span>وورد Word</span>
-            <span className="bg-blue-500/30 text-blue-200 text-[10px] px-1 py-0.5 rounded font-mono">
-              PRO
-            </span>
+            <FileText className="w-3 h-3 text-blue-200" />
+            <span>وورد</span>
           </button>
 
           {/* Excel Switcher Tab */}
           <button
             id="mode-switch-excel"
             onClick={() => onSelectMode('excel')}
-            className={`flex items-center gap-1.5 px-3 py-1 rounded-md text-xs sm:text-sm font-bold transition-all ${
+            className={`flex items-center gap-1 px-2 py-0.5 rounded text-[11px] font-bold transition-all ${
               mode === 'excel'
-                ? 'bg-emerald-600 text-white shadow-sm ring-1 ring-emerald-400'
+                ? 'bg-emerald-600 text-white shadow-xs ring-1 ring-emerald-300'
                 : 'bg-slate-800 text-slate-300 hover:bg-slate-700 hover:text-white'
             }`}
           >
-            <div className="w-5 h-5 rounded bg-emerald-700 flex items-center justify-center text-white text-[11px] font-black border border-emerald-400">
-              X
-            </div>
-            <span>إكسل Excel</span>
-            <span className="bg-emerald-500/30 text-emerald-200 text-[10px] px-1 py-0.5 rounded font-mono">
-              PRO
-            </span>
+            <TableIcon className="w-3 h-3 text-emerald-200" />
+            <span>إكسل</span>
           </button>
 
-          <div className="h-5 w-px bg-slate-700 mx-1 hidden sm:block" />
+          <div className="h-3.5 w-px bg-slate-700 mx-0.5 hidden sm:block" />
 
-          {/* Document Title Display / Edit */}
+          {/* Document Title Pill (كما في المرفق) */}
           {isEditingTitle ? (
             <form onSubmit={handleTitleSubmit} className="flex items-center">
               <input
@@ -128,76 +127,51 @@ export const TopHeader: React.FC<TopHeaderProps> = ({
                 value={documentTitle}
                 onChange={(e) => onTitleChange(e.target.value)}
                 onBlur={() => setIsEditingTitle(false)}
-                className="bg-slate-800 text-white border border-blue-500 rounded px-2 py-0.5 text-xs sm:text-sm font-medium focus:outline-none"
+                className="bg-slate-900 text-white border border-blue-400 rounded px-1.5 py-0 text-[11px] font-bold focus:outline-none"
               />
             </form>
           ) : (
             <button
               onClick={() => setIsEditingTitle(true)}
-              className="flex items-center gap-1.5 text-xs sm:text-sm font-medium text-slate-200 hover:text-white hover:bg-slate-800 px-2 py-0.5 rounded transition"
+              className="flex items-center gap-1 text-[11px] font-bold text-slate-100 bg-[#0f172a]/90 hover:bg-slate-900 border border-slate-600 px-2 py-0.5 rounded transition max-w-[170px] truncate"
               title="انقر لتعديل اسم المستند"
             >
-              <span className="truncate max-w-[150px] sm:max-w-[240px] font-bold">{documentTitle}</span>
-              <Edit3 className="w-3.5 h-3.5 text-slate-400 opacity-60 hover:opacity-100" />
+              <span className="truncate">{documentTitle}</span>
+              <Edit3 className="w-2.5 h-2.5 text-slate-400 shrink-0" />
             </button>
           )}
 
-          {/* Auto-save Status Indicator */}
-          <div className="hidden md:flex items-center gap-1.5 text-[11px] text-emerald-400 bg-emerald-950/60 border border-emerald-800/60 px-2 py-0.5 rounded-full">
-            <CheckCircle2 className="w-3 h-3 text-emerald-400" />
-            <span>{lastSavedText}</span>
+          {/* Auto-save Status Indicator (Room Cloud) */}
+          <div className="flex items-center gap-1 text-[10px] font-medium text-emerald-300 bg-emerald-950/70 border border-emerald-700/60 px-2 py-0.2 rounded-full whitespace-nowrap">
+            <CheckCircle2 className="w-2.5 h-2.5 text-emerald-400 shrink-0" />
+            <span>محفوظ تلقائياً (Room)</span>
           </div>
         </div>
 
-        {/* Right Section: Quick Action Buttons */}
-        <div className="flex items-center gap-1 sm:gap-2">
-          {/* Undo / Redo */}
-          <div className="flex items-center bg-slate-800/90 rounded border border-slate-700">
+        {/* Left Section: Compact Quick Action Buttons in Single Line */}
+        <div className="flex items-center gap-1 shrink-0">
+          {/* Templates / Simulation Button (نماذج ❐) */}
+          {onOpenSimulator && (
             <button
-              id="header-undo-button"
-              onClick={onUndo}
-              disabled={!canUndo}
-              className={`p-1.5 text-slate-300 hover:text-white hover:bg-slate-700 rounded-r transition ${
-                !canUndo ? 'opacity-40 cursor-not-allowed' : ''
-              }`}
-              title="تراجع (Ctrl+Z)"
+              id="header-simulator-trigger"
+              onClick={onOpenSimulator}
+              className="flex items-center gap-1 px-1.5 py-0.5 rounded bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-700 font-medium transition text-[11px]"
+              title="نماذج ومحاكاة المستند"
             >
-              <RotateCw className="w-3.5 h-3.5 transform -scale-x-100" />
+              <Sparkles className="w-3 h-3 text-amber-400" />
+              <span>نماذج</span>
             </button>
-            <div className="w-px h-3.5 bg-slate-700" />
-            <button
-              id="header-redo-button"
-              onClick={onRedo}
-              disabled={!canRedo}
-              className={`p-1.5 text-slate-300 hover:text-white hover:bg-slate-700 rounded-l transition ${
-                !canRedo ? 'opacity-40 cursor-not-allowed' : ''
-              }`}
-              title="إعادة (Ctrl+Y)"
-            >
-              <RotateCcw className="w-3.5 h-3.5 transform -scale-x-100" />
-            </button>
-          </div>
+          )}
 
-          {/* Quick Save */}
-          <button
-            id="header-save-button"
-            onClick={onSave}
-            className="flex items-center gap-1 px-2.5 py-1 rounded bg-slate-800 hover:bg-slate-700 text-xs text-slate-200 border border-slate-700 font-medium transition"
-            title="حفظ المستند"
-          >
-            <Save className="w-3.5 h-3.5 text-blue-400" />
-            <span className="hidden sm:inline">حفظ</span>
-          </button>
-
-          {/* Open / Import */}
+          {/* Open / Import (فتح ⇪) */}
           <button
             id="header-open-button"
             onClick={() => fileInputRef.current?.click()}
-            className="flex items-center gap-1 px-2.5 py-1 rounded bg-slate-800 hover:bg-slate-700 text-xs text-slate-200 border border-slate-700 font-medium transition"
+            className="flex items-center gap-1 px-1.5 py-0.5 rounded bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-700 font-medium transition text-[11px]"
             title="فتح أو استيراد ملف"
           >
-            <FolderOpen className="w-3.5 h-3.5 text-amber-400" />
-            <span className="hidden sm:inline">فتح</span>
+            <FolderOpen className="w-3 h-3 text-amber-400" />
+            <span>فتح</span>
           </button>
           <input
             type="file"
@@ -207,63 +181,49 @@ export const TopHeader: React.FC<TopHeaderProps> = ({
             className="hidden"
           />
 
-          {/* Print / Preview */}
+          {/* Print (🖨) */}
           <button
             id="header-print-button"
             onClick={onPrint}
-            className="flex items-center gap-1 px-2.5 py-1 rounded bg-slate-800 hover:bg-slate-700 text-xs text-slate-200 border border-slate-700 font-medium transition"
+            className="p-1 rounded bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-700 font-medium transition"
             title="طباعة أو معاينة ورقية"
           >
-            <Printer className="w-3.5 h-3.5 text-indigo-400" />
-            <span className="hidden sm:inline">طباعة</span>
+            <Printer className="w-3 h-3 text-indigo-300" />
           </button>
 
-          {/* Virtual Keyboard Toggle */}
+          {/* Virtual Keyboard Toggle (كيبورد ⌨) */}
           <button
             id="header-keyboard-toggle"
             onClick={onToggleKeyboard}
-            className={`flex items-center gap-1.5 px-2.5 py-1 rounded text-xs font-bold transition border ${
+            className={`flex items-center gap-1 px-1.5 py-0.5 rounded text-[11px] font-bold transition border ${
               isKeyboardOpen
-                ? 'bg-teal-600 text-white border-teal-400 shadow-sm'
+                ? 'bg-teal-700 text-white border-teal-400'
                 : 'bg-slate-800 hover:bg-slate-700 text-teal-300 border-slate-700'
             }`}
-            title="إظهار / إخفاء لوحة المفاتيح العربية الملحقة مع التشكيل"
+            title="إظهار / إخفاء لوحة المفاتيح"
           >
-            <Keyboard className="w-3.5 h-3.5" />
-            <span className="hidden sm:inline">لوحة المفاتيح</span>
+            <Keyboard className="w-3 h-3" />
+            <span>كيبورد</span>
           </button>
 
-          {/* Simulation & Test Suite Trigger */}
-          {onOpenSimulator && (
-            <button
-              id="header-simulator-trigger"
-              onClick={onOpenSimulator}
-              className="flex items-center gap-1.5 px-2.5 py-1 rounded bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-600 hover:to-amber-700 text-slate-950 text-xs font-black shadow-sm transition border border-amber-300 active:scale-95"
-              title="محاكاة عملية إنشاء وتنسيق المستند وورد واختبار شامل"
-            >
-              <Sparkles className="w-3.5 h-3.5 text-slate-950" />
-              <span className="hidden md:inline">محاكاة وفحص المستند</span>
-            </button>
-          )}
-
-          {/* Export Dropdown */}
+          {/* Export Dropdown (تصدير ⬇ v) */}
           <div className="relative">
             <button
               id="header-export-dropdown"
               onClick={() => setShowExportMenu(!showExportMenu)}
-              className="flex items-center gap-1.5 px-3 py-1 rounded bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-500 hover:to-indigo-500 text-white text-xs font-bold shadow-sm transition"
+              className="flex items-center gap-1 px-2 py-0.5 rounded bg-[#2563eb] hover:bg-blue-600 text-white text-[11px] font-bold shadow-xs transition"
             >
-              <Download className="w-3.5 h-3.5" />
+              <Download className="w-3 h-3" />
               <span>تصدير</span>
-              <ChevronDown className="w-3 h-3" />
+              <ChevronDown className="w-2.5 h-2.5" />
             </button>
 
             {showExportMenu && (
               <div 
-                className="absolute left-0 mt-1.5 w-52 bg-white text-slate-800 rounded-lg shadow-2xl border border-slate-200 py-1 text-xs z-50 animate-in fade-in slide-in-from-top-1"
+                className="absolute left-0 mt-1 w-52 bg-white text-slate-800 rounded-lg shadow-2xl border border-slate-200 py-1 text-xs z-50 animate-in fade-in slide-in-from-top-1"
                 onClick={() => setShowExportMenu(false)}
               >
-                <div className="px-3 py-1.5 font-bold text-slate-400 border-b border-slate-100 text-[10px] uppercase tracking-wider">
+                <div className="px-3 py-1 font-bold text-slate-400 border-b border-slate-100 text-[10px] uppercase tracking-wider">
                   خيارات التصدير المتاحة
                 </div>
 
@@ -271,34 +231,34 @@ export const TopHeader: React.FC<TopHeaderProps> = ({
                   <>
                     <button
                       onClick={onExportDoc}
-                      className="w-full text-right px-3 py-2 hover:bg-blue-50 flex items-center justify-between text-slate-700 hover:text-blue-700 transition"
+                      className="w-full text-right px-3 py-1.5 hover:bg-blue-50 flex items-center justify-between text-slate-700 hover:text-blue-700 transition text-xs"
                     >
                       <span className="font-semibold">تصدير مستند وورد (.doc/.docx)</span>
-                      <span className="text-[10px] bg-blue-100 text-blue-800 px-1.5 py-0.5 rounded font-mono">Word</span>
+                      <span className="text-[10px] bg-blue-100 text-blue-800 px-1 py-0.2 rounded font-mono">Word</span>
                     </button>
                     <button
                       onClick={onExportPdf}
-                      className="w-full text-right px-3 py-2 hover:bg-rose-50 flex items-center justify-between text-slate-700 hover:text-rose-700 transition"
+                      className="w-full text-right px-3 py-1.5 hover:bg-rose-50 flex items-center justify-between text-slate-700 hover:text-rose-700 transition text-xs"
                     >
                       <span className="font-semibold">تصدير أو طباعة PDF</span>
-                      <span className="text-[10px] bg-rose-100 text-rose-800 px-1.5 py-0.5 rounded font-mono">PDF</span>
+                      <span className="text-[10px] bg-rose-100 text-rose-800 px-1 py-0.2 rounded font-mono">PDF</span>
                     </button>
                     {onExportHtml && (
                       <button
                         onClick={onExportHtml}
-                        className="w-full text-right px-3 py-2 hover:bg-amber-50 flex items-center justify-between text-slate-700 hover:text-amber-700 transition"
+                        className="w-full text-right px-3 py-1.5 hover:bg-amber-50 flex items-center justify-between text-slate-700 hover:text-amber-700 transition text-xs"
                       >
                         <span>صفحة ويب كاملة (.html)</span>
-                        <span className="text-[10px] bg-amber-100 text-amber-800 px-1.5 py-0.5 rounded font-mono">HTML</span>
+                        <span className="text-[10px] bg-amber-100 text-amber-800 px-1 py-0.2 rounded font-mono">HTML</span>
                       </button>
                     )}
                     {onExportTxt && (
                       <button
                         onClick={onExportTxt}
-                        className="w-full text-right px-3 py-2 hover:bg-slate-50 flex items-center justify-between text-slate-700 transition"
+                        className="w-full text-right px-3 py-1.5 hover:bg-slate-50 flex items-center justify-between text-slate-700 transition text-xs"
                       >
                         <span>نص مجرد (.txt)</span>
-                        <span className="text-[10px] bg-slate-100 text-slate-700 px-1.5 py-0.5 rounded font-mono">TXT</span>
+                        <span className="text-[10px] bg-slate-100 text-slate-700 px-1 py-0.2 rounded font-mono">TXT</span>
                       </button>
                     )}
                   </>
@@ -307,33 +267,46 @@ export const TopHeader: React.FC<TopHeaderProps> = ({
                     {onExportXlsx && (
                       <button
                         onClick={onExportXlsx}
-                        className="w-full text-right px-3 py-2 hover:bg-emerald-50 flex items-center justify-between text-slate-700 hover:text-emerald-700 transition"
+                        className="w-full text-right px-3 py-1.5 hover:bg-emerald-50 flex items-center justify-between text-slate-700 hover:text-emerald-700 transition text-xs"
                       >
                         <span className="font-semibold">مصنف إكسل كامل (.xlsx)</span>
-                        <span className="text-[10px] bg-emerald-100 text-emerald-800 px-1.5 py-0.5 rounded font-mono">Excel</span>
+                        <span className="text-[10px] bg-emerald-100 text-emerald-800 px-1 py-0.2 rounded font-mono">Excel</span>
                       </button>
                     )}
                     {onExportCsv && (
                       <button
                         onClick={onExportCsv}
-                        className="w-full text-right px-3 py-2 hover:bg-teal-50 flex items-center justify-between text-slate-700 hover:text-teal-700 transition"
+                        className="w-full text-right px-3 py-1.5 hover:bg-teal-50 flex items-center justify-between text-slate-700 hover:text-teal-700 transition text-xs"
                       >
                         <span>ملف جدول مفصول بفواصل (.csv)</span>
-                        <span className="text-[10px] bg-teal-100 text-teal-800 px-1.5 py-0.5 rounded font-mono">CSV</span>
+                        <span className="text-[10px] bg-teal-100 text-teal-800 px-1 py-0.2 rounded font-mono">CSV</span>
                       </button>
                     )}
                     <button
                       onClick={onExportPdf}
-                      className="w-full text-right px-3 py-2 hover:bg-rose-50 flex items-center justify-between text-slate-700 hover:text-rose-700 transition"
+                      className="w-full text-right px-3 py-1.5 hover:bg-rose-50 flex items-center justify-between text-slate-700 hover:text-rose-700 transition text-xs"
                     >
                       <span className="font-semibold">طباعة أو تصدير PDF للجدول</span>
-                      <span className="text-[10px] bg-rose-100 text-rose-800 px-1.5 py-0.5 rounded font-mono">PDF</span>
+                      <span className="text-[10px] bg-rose-100 text-rose-800 px-1 py-0.2 rounded font-mono">PDF</span>
                     </button>
                   </>
                 )}
               </div>
             )}
           </div>
+
+          {/* Quick Undo Button (⟲) */}
+          <button
+            id="header-undo-button"
+            onClick={onUndo}
+            disabled={!canUndo}
+            className={`p-1 rounded bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-700 transition ${
+              !canUndo ? 'opacity-40 cursor-not-allowed' : ''
+            }`}
+            title="تراجع (Ctrl+Z)"
+          >
+            <RotateCw className="w-3 h-3 transform -scale-x-100" />
+          </button>
         </div>
       </div>
     </header>

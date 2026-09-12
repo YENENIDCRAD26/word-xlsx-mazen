@@ -77,8 +77,8 @@ export const ExcelRibbon: React.FC<ExcelRibbonProps> = ({
 
   const tabs: { id: ExcelRibbonTab; label: string }[] = [
     { id: 'file', label: 'ملف' },
-    { id: 'home', label: 'تنسيق الخلايا' },
-    { id: 'insert', label: 'إدراج أشكال وأختام' },
+    { id: 'home', label: 'الرئيسية' },
+    { id: 'insert', label: 'إدراج' },
     { id: 'formulas', label: 'صيغ ودوال ∑' },
     { id: 'data', label: 'بيانات وجداول' },
     { id: 'view', label: 'عرض وتجميد' },
@@ -114,15 +114,15 @@ export const ExcelRibbon: React.FC<ExcelRibbonProps> = ({
 
   return (
     <div className="bg-white border-b border-slate-300 select-none no-print shadow-2xs">
-      {/* Ribbon Navigation Tabs */}
-      <div className="flex items-center px-3 border-b border-slate-200 overflow-x-auto bg-slate-50 text-xs">
+      {/* Ribbon Navigation Tabs - Exact 0.5cm (28px) */}
+      <div className="flex items-center px-2 border-b border-slate-200 overflow-x-auto bg-slate-50 text-[11px] h-[28px] scrollbar-none">
         {tabs.map((tab) => {
           const isActive = activeTab === tab.id;
           return (
             <button
               key={tab.id}
               onClick={() => onSelectTab(tab.id)}
-              className={`px-3.5 py-1.5 font-medium relative whitespace-nowrap transition-colors flex items-center gap-1 ${
+              className={`px-3 h-full font-medium relative whitespace-nowrap transition-colors flex items-center gap-1 ${
                 isActive
                   ? 'text-emerald-700 bg-white font-bold border-t-2 border-t-emerald-600 border-x border-slate-200 shadow-2xs -mb-px'
                   : 'text-slate-700 hover:text-emerald-600 hover:bg-slate-100'
@@ -134,12 +134,12 @@ export const ExcelRibbon: React.FC<ExcelRibbonProps> = ({
         })}
       </div>
 
-      {/* Ribbon Controls Area */}
-      <div className="p-2 min-h-[54px] flex items-center gap-2 overflow-x-auto bg-slate-50/70 text-slate-800 text-xs">
+      {/* Ribbon Controls Area - Exact 0.5cm row (32px) */}
+      <div className="px-2 py-0.5 min-h-[32px] max-h-[34px] flex items-center gap-1.5 overflow-x-auto bg-slate-50/80 text-slate-800 text-xs scrollbar-none">
         
         {/* ================= HOME / FORMAT TAB ================= */}
         {activeTab === 'home' && (
-          <div className="flex items-center gap-2 flex-wrap">
+          <div className="flex items-center gap-1.5 flex-nowrap shrink-0">
             {/* Bold, Italic, Underline */}
             <div className="flex items-center bg-white border border-slate-300 rounded p-0.5 shadow-2xs gap-0.5">
               <button

@@ -103,4 +103,5 @@ export interface VirtualKeyboardState {
   capsActive: boolean;
   pinned: boolean;
   preferredInputMode?: 'virtual' | 'native';
+  autoSwitch?: boolean;
 }
