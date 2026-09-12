@@ -17,6 +17,7 @@ import { WordEditor } from './components/WordEditor/WordEditor';
 import { ExcelRibbon } from './components/ExcelEditor/ExcelRibbon';
 import { ExcelGrid } from './components/ExcelEditor/ExcelGrid';
 import { DocumentSimulatorModal } from './components/DocumentSimulatorModal';
+import { ExcelSimulatorModal } from './components/ExcelEditor/ExcelSimulatorModal';
 import { 
   exportToWordDoc, 
   exportToHTML, 
@@ -89,6 +90,7 @@ export default function App() {
   const [canUndo, setCanUndo] = useState(true);
   const [canRedo, setCanRedo] = useState(false);
   const [isSimulatorOpen, setIsSimulatorOpen] = useState(false);
+  const [isExcelSimulatorOpen, setIsExcelSimulatorOpen] = useState(false);
 
   // Reference to Word ContentEditable Div
   const wordEditorRef = useRef<HTMLDivElement | null>(null);
@@ -352,6 +354,142 @@ export default function App() {
     }));
   };
 
+  // Sort rows based on column and direction
+  const handleSortColumn = (col: string, direction: 'asc' | 'desc') => {
+    const sheetId = excelState.activeSheetId;
+    setExcelState((prev) => {
+      const updatedSheets = prev.sheets.map((sheet) => {
+        if (sheet.id !== sheetId) return sheet;
+
+        const rowIndices: number[] = [];
+        for (let r = 2; r <= sheet.rowCount; r++) {
+          const aVal = sheet.data[`A${r}`]?.value || '';
+          if (aVal.includes('∑') || sheet.data[`B${r}`]?.value?.includes('الإجمالي')) {
+            continue;
+          }
+          let hasContent = false;
+          for (let c = 0; c < sheet.colCount; c++) {
+            const letter = colIndexToLetter(c);
+            if (sheet.data[`${letter}${r}`]?.value || sheet.data[`${letter}${r}`]?.formula) {
+              hasContent = true;
+              break;
+            }
+          }
+          if (hasContent) {
+            rowIndices.push(r);
+          }
+        }
+
+        rowIndices.sort((rA, rB) => {
+          const cellA = sheet.data[`${col}${rA}`]?.value || '';
+          const cellB = sheet.data[`${col}${rB}`]?.value || '';
+          const numA = parseFloat(cellA.replace(/[^\d.-]/g, ''));
+          const numB = parseFloat(cellB.replace(/[^\d.-]/g, ''));
+
+          if (!isNaN(numA) && !isNaN(numB)) {
+            return direction === 'asc' ? numA - numB : numB - numA;
+          }
+          return direction === 'asc' 
+            ? cellA.localeCompare(cellB, 'ar') 
+            : cellB.localeCompare(cellA, 'ar');
+        });
+
+        const rowsDataSnapshot = rowIndices.map((origR) => {
+          const rowData: Record<string, CellData> = {};
+          for (let c = 0; c < sheet.colCount; c++) {
+            const letter = colIndexToLetter(c);
+            const key = `${letter}${origR}`;
+            if (sheet.data[key]) {
+              rowData[letter] = { ...sheet.data[key] };
+            }
+          }
+          return rowData;
+        });
+
+        const newData = { ...sheet.data };
+        rowIndices.forEach((_, idx) => {
+          const targetRow = idx + 2;
+          const sourceData = rowsDataSnapshot[idx];
+
+          for (let c = 0; c < sheet.colCount; c++) {
+            const letter = colIndexToLetter(c);
+            delete newData[`${letter}${targetRow}`];
+          }
+
+          for (const [letter, cellVal] of Object.entries(sourceData)) {
+            newData[`${letter}${targetRow}`] = {
+              ...cellVal,
+              value: letter === 'A' ? `${idx + 1}` : cellVal.value,
+            };
+          }
+        });
+
+        return { ...sheet, data: newData };
+      });
+
+      return { ...prev, sheets: updatedSheets };
+    });
+  };
+
+  // Apply visual theme to Excel table
+  const handleApplyTableStyle = (styleType: string) => {
+    const sheetId = excelState.activeSheetId;
+    setExcelState((prev) => {
+      const updatedSheets = prev.sheets.map((sheet) => {
+        if (sheet.id !== sheetId) return sheet;
+
+        const isNavy = styleType === 'navy';
+        const headerBg = isNavy ? '#1e3a8a' : '#15803d';
+        const stripeBg = isNavy ? '#f0f9ff' : '#f8fafc';
+        const borderColor = isNavy ? '#93c5fd' : '#cbd5e1';
+
+        const newData = { ...sheet.data };
+        for (let r = 1; r <= 15; r++) {
+          for (let c = 0; c < Math.min(sheet.colCount, 8); c++) {
+            const letter = colIndexToLetter(c);
+            const addr = `${letter}${r}`;
+            const cell = newData[addr] || { value: '' };
+
+            if (r === 1) {
+              newData[addr] = {
+                ...cell,
+                bg: headerBg,
+                color: '#ffffff',
+                bold: true,
+                align: 'center',
+                borderStyle: 'all',
+                borderColor,
+              };
+            } else if (cell.value && (cell.value.includes('∑') || cell.value.includes('الإجمالي'))) {
+              newData[addr] = {
+                ...cell,
+                bold: true,
+                borderStyle: 'double_bottom',
+                borderColor: isNavy ? '#1e3a8a' : '#0369a1',
+              };
+            } else if (r % 2 === 1) {
+              newData[addr] = {
+                ...cell,
+                bg: stripeBg,
+                borderStyle: 'all',
+                borderColor,
+              };
+            } else {
+              newData[addr] = {
+                ...cell,
+                borderStyle: 'all',
+                borderColor,
+              };
+            }
+          }
+        }
+
+        return { ...sheet, data: newData };
+      });
+      return { ...prev, sheets: updatedSheets };
+    });
+  };
+
   // Insert table into Word document
   const handleInsertTable = (rows: number, cols: number) => {
     let tableHtml = '<table style="width: 100%; border-collapse: collapse; margin: 16px 0; border: 1px solid #94a3b8;"><thead><tr style="background-color: #f1f5f9;">';
@@ -565,7 +703,13 @@ export default function App() {
         onExportCsv={() => exportToCSV(currentSheet)}
         onImportFile={handleImportFile}
         lastSavedText={lastSavedText}
-        onOpenSimulator={() => setIsSimulatorOpen(true)}
+        onOpenSimulator={() => {
+          if (mode === 'word') {
+            setIsSimulatorOpen(true);
+          } else {
+            setIsExcelSimulatorOpen(true);
+          }
+        }}
       />
 
       {/* 2. Ribbon & Command Toolbar for Active Suite Mode */}
@@ -629,6 +773,9 @@ export default function App() {
           onExportCsv={() => exportToCSV(currentSheet)}
           onPrint={handlePrintDocument}
           activeSheet={currentSheet}
+          onOpenSimulator={() => setIsExcelSimulatorOpen(true)}
+          onApplyTableStyle={handleApplyTableStyle}
+          onSortColumn={handleSortColumn}
         />
       )}
 
@@ -716,6 +863,26 @@ export default function App() {
         onExportPdf={handlePrintDocument}
         onExportHtml={() => exportToHTML(wordState)}
         onExportTxt={() => exportToText(wordState)}
+      />
+
+      {/* 7. Comprehensive Excel Simulator & Table/Cell Control Modal */}
+      <ExcelSimulatorModal
+        isOpen={isExcelSimulatorOpen}
+        onClose={() => setIsExcelSimulatorOpen(false)}
+        excelState={excelState}
+        onUpdateExcelState={setExcelState}
+        activeSheet={currentSheet}
+        selectedCell={selectedCell}
+        onSelectCell={setSelectedCell}
+        onUpdateCell={handleUpdateCell}
+        onInsertRow={handleInsertRow}
+        onDeleteRow={handleDeleteRow}
+        onInsertCol={handleInsertCol}
+        onDeleteCol={handleDeleteCol}
+        onFreezePanes={handleFreezePanes}
+        onExportXlsx={() => exportToExcelXLSX(excelState)}
+        onExportCsv={() => exportToCSV(currentSheet)}
+        onPrint={handlePrintDocument}
       />
     </div>
   );

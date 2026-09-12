@@ -22,7 +22,11 @@ import {
   Palette, 
   Type, 
   RotateCcw,
-  Sparkles
+  Sparkles,
+  Grid,
+  Square,
+  ArrowUpDown,
+  Table as TableIcon
 } from 'lucide-react';
 import { CellData, ExcelRibbonTab, ExcelSheet } from '../../types';
 
@@ -46,6 +50,9 @@ interface ExcelRibbonProps {
   onExportCsv: () => void;
   onPrint: () => void;
   activeSheet: ExcelSheet;
+  onOpenSimulator?: () => void;
+  onApplyTableStyle?: (styleType: string) => void;
+  onSortColumn?: (col: string, dir: 'asc' | 'desc') => void;
 }
 
 export const ExcelRibbon: React.FC<ExcelRibbonProps> = ({
@@ -67,11 +74,15 @@ export const ExcelRibbon: React.FC<ExcelRibbonProps> = ({
   onExportXlsx,
   onExportCsv,
   onPrint,
-  activeSheet
+  activeSheet,
+  onOpenSimulator,
+  onApplyTableStyle,
+  onSortColumn,
 }) => {
   const [showBgColorPicker, setShowBgColorPicker] = useState(false);
   const [showTextColorPicker, setShowTextColorPicker] = useState(false);
   const [showFormatMenu, setShowFormatMenu] = useState(false);
+  const [showBorderMenu, setShowBorderMenu] = useState(false);
   const [showFormulaMenu, setShowFormulaMenu] = useState(false);
   const [showFreezeMenu, setShowFreezeMenu] = useState(false);
 
@@ -98,10 +109,19 @@ export const ExcelRibbon: React.FC<ExcelRibbonProps> = ({
 
   const numberFormats: { id: CellData['format']; label: string; example: string }[] = [
     { id: 'general', label: 'عام (بلا تنسيق خاص)', example: '1234.5' },
-    { id: 'currency_sar', label: 'عملة (ريال ر.س)', example: '1,234.50 ر.س' },
+    { id: 'currency_yer', label: 'عملة (ريال يمني ر.ي)', example: '1,234 ر.ي' },
+    { id: 'currency_sar', label: 'عملة (ريال سعودي ر.س)', example: '1,234.50 ر.س' },
     { id: 'currency_usd', label: 'عملة دولار ($)', example: '$1,234.50' },
     { id: 'number', label: 'أرقام بفواصل آلاف', example: '1,234.50' },
     { id: 'percent', label: 'نسبة مئوية (%)', example: '15.0%' },
+  ];
+
+  const cellBorderOptions: { id: CellData['borderStyle']; label: string; borderColor?: string }[] = [
+    { id: 'all', label: 'كافة الحدود (All Borders)', borderColor: '#94a3b8' },
+    { id: 'box', label: 'إطار خارجي سميك (Thick Box)', borderColor: '#15803d' },
+    { id: 'double_bottom', label: 'حد سفلي مزدوج (للمجاميع)', borderColor: '#0369a1' },
+    { id: 'bottom', label: 'حد سفلي عادي', borderColor: '#334155' },
+    { id: 'none', label: 'بلا حدود (No Border)' },
   ];
 
   const formulasList = [
@@ -263,7 +283,7 @@ export const ExcelRibbon: React.FC<ExcelRibbonProps> = ({
               </button>
             </div>
 
-            {/* Wrap Text & Borders */}
+            {/* Wrap Text */}
             <button
               onClick={() => onUpdateSelectedCell({ wrapText: !selectedCellData?.wrapText })}
               className={`px-2 py-1 rounded text-xs font-semibold border shadow-2xs ${
@@ -273,6 +293,37 @@ export const ExcelRibbon: React.FC<ExcelRibbonProps> = ({
             >
               التفاف النص
             </button>
+
+            {/* Cell Borders Dropdown */}
+            <div className="relative">
+              <button
+                onClick={() => setShowBorderMenu(!showBorderMenu)}
+                className="flex items-center gap-1 px-2 py-1 hover:bg-slate-100 rounded text-slate-700 border border-slate-300 bg-white shadow-2xs"
+                title="حدود وإطارات الخلايا"
+              >
+                <Grid className="w-3.5 h-3.5 text-slate-700" />
+                <span className="text-[11px] font-semibold">الحدود</span>
+                <ChevronDown className="w-3 h-3 text-slate-400" />
+              </button>
+
+              {showBorderMenu && (
+                <div className="absolute top-9 right-0 bg-white rounded-lg shadow-xl border border-slate-200 py-1 z-50 w-52">
+                  {cellBorderOptions.map((b) => (
+                    <button
+                      key={b.id}
+                      onClick={() => {
+                        onUpdateSelectedCell({ borderStyle: b.id, borderColor: b.borderColor });
+                        setShowBorderMenu(false);
+                      }}
+                      className="w-full text-right px-3 py-1.5 hover:bg-emerald-50 text-xs flex items-center justify-between"
+                    >
+                      <span className="font-medium text-slate-800">{b.label}</span>
+                      {selectedCellData?.borderStyle === b.id && <Check className="w-3 h-3 text-emerald-600" />}
+                    </button>
+                  ))}
+                </div>
+              )}
+            </div>
 
             {/* Number Formatting Menu */}
             <div className="relative">
@@ -343,6 +394,20 @@ export const ExcelRibbon: React.FC<ExcelRibbonProps> = ({
                 <span>حذف عمود</span>
               </button>
             </div>
+
+            {onOpenSimulator && (
+              <>
+                <div className="w-px h-6 bg-slate-300 mx-0.5" />
+                <button
+                  onClick={onOpenSimulator}
+                  className="flex items-center gap-1.5 px-2.5 py-1 bg-gradient-to-r from-emerald-600 to-teal-700 hover:from-emerald-700 hover:to-teal-800 text-white rounded text-xs font-bold shadow-xs transition"
+                  title="فتح محاكي وظائف وأدوات جداول إكسل"
+                >
+                  <Sparkles className="w-3.5 h-3.5 text-amber-300" />
+                  <span>محاكاة وأدوات الجدول ⚡</span>
+                </button>
+              </>
+            )}
           </div>
         )}
 
@@ -514,11 +579,66 @@ export const ExcelRibbon: React.FC<ExcelRibbonProps> = ({
           </div>
         )}
 
-        {/* DATA TAB fallback */}
+        {/* DATA TAB - Professional Data & Table Controls */}
         {activeTab === 'data' && (
-          <div className="flex items-center gap-2 text-slate-600 text-xs">
-            <span className="font-bold">أدوات البيانات:</span>
-            <span>تصفية، فرز تلقائي من أ إلى ي، وإدارة مجموعات الحقول المتقدمة.</span>
+          <div className="flex items-center gap-1.5 flex-nowrap shrink-0">
+            {/* Sort Controls */}
+            <div className="flex items-center bg-white border border-slate-300 rounded p-0.5 shadow-2xs gap-1">
+              <span className="text-[11px] font-bold text-slate-500 px-1">فرز البيانات:</span>
+              <button
+                onClick={() => onSortColumn && onSortColumn('B', 'asc')}
+                className="flex items-center gap-1 px-2 py-0.5 hover:bg-slate-100 rounded text-slate-700 font-semibold"
+                title="فرز تصاعدي من أ إلى ي"
+              >
+                <ArrowUpDown className="w-3 h-3 text-emerald-600" />
+                <span>تصاعدي (أ - ي)</span>
+              </button>
+              <button
+                onClick={() => onSortColumn && onSortColumn('B', 'desc')}
+                className="flex items-center gap-1 px-2 py-0.5 hover:bg-slate-100 rounded text-slate-700 font-semibold"
+                title="فرز تنازلي من ي إلى أ"
+              >
+                <ArrowUpDown className="w-3 h-3 text-blue-600 rotate-180" />
+                <span>تنازلي (ي - أ)</span>
+              </button>
+            </div>
+
+            <div className="w-px h-6 bg-slate-300 mx-0.5" />
+
+            {/* Table Styling Suite */}
+            <div className="flex items-center gap-1">
+              <button
+                onClick={() => onApplyTableStyle && onApplyTableStyle('emerald')}
+                className="flex items-center gap-1 px-2 py-1 bg-emerald-50 hover:bg-emerald-100 text-emerald-800 border border-emerald-300 rounded text-xs font-bold shadow-2xs transition"
+                title="تنسيق الجدول بالنمط الزمردي الرسمي"
+              >
+                <TableIcon className="w-3.5 h-3.5 text-emerald-600" />
+                <span>تنسيق جدول زمردي</span>
+              </button>
+
+              <button
+                onClick={() => onApplyTableStyle && onApplyTableStyle('navy')}
+                className="flex items-center gap-1 px-2 py-1 bg-blue-50 hover:bg-blue-100 text-blue-800 border border-blue-300 rounded text-xs font-bold shadow-2xs transition"
+                title="تنسيق الجدول بالنمط الكحلي المالي"
+              >
+                <TableIcon className="w-3.5 h-3.5 text-blue-600" />
+                <span>تنسيق جدول كحلي</span>
+              </button>
+            </div>
+
+            {onOpenSimulator && (
+              <>
+                <div className="w-px h-6 bg-slate-300 mx-0.5" />
+                <button
+                  onClick={onOpenSimulator}
+                  className="flex items-center gap-1.5 px-2.5 py-1 bg-gradient-to-r from-teal-700 to-emerald-700 hover:from-teal-800 hover:to-emerald-800 text-white rounded text-xs font-bold shadow-xs transition"
+                  title="فتح محاكي وظائف وأدوات جداول إكسل"
+                >
+                  <Sparkles className="w-3.5 h-3.5 text-amber-300" />
+                  <span>محاكي وأدوات الجدول ⚡</span>
+                </button>
+              </>
+            )}
           </div>
         )}
 

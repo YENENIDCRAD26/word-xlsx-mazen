@@ -178,6 +178,8 @@ export function formatCellValue(value: string | number, format?: CellData['forma
   switch (format) {
     case 'currency_sar':
       return `${num.toLocaleString('en-US', { minimumFractionDigits: 0, maximumFractionDigits: 2 })} ر.س`;
+    case 'currency_yer':
+      return `${num.toLocaleString('en-US', { minimumFractionDigits: 0, maximumFractionDigits: 0 })} ر.ي`;
     case 'currency_usd':
       return `$${num.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
     case 'percent':

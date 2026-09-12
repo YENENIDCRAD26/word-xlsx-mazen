@@ -150,16 +150,20 @@ export const TopHeader: React.FC<TopHeaderProps> = ({
 
         {/* Left Section: Compact Quick Action Buttons in Single Line */}
         <div className="flex items-center gap-1 shrink-0">
-          {/* Templates / Simulation Button (نماذج ❐) */}
+          {/* Templates / Simulation Button */}
           {onOpenSimulator && (
             <button
               id="header-simulator-trigger"
               onClick={onOpenSimulator}
-              className="flex items-center gap-1 px-1.5 py-0.5 rounded bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-700 font-medium transition text-[11px]"
-              title="نماذج ومحاكاة المستند"
+              className={`flex items-center gap-1 px-2 py-0.5 rounded font-bold transition text-[11px] shadow-xs ${
+                mode === 'excel'
+                  ? 'bg-emerald-700 hover:bg-emerald-600 text-white border border-emerald-500'
+                  : 'bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-700'
+              }`}
+              title={mode === 'word' ? 'نماذج ومحاكاة مستند وورد' : 'محاكي وظائف وأدوات جداول إكسل'}
             >
-              <Sparkles className="w-3 h-3 text-amber-400" />
-              <span>نماذج</span>
+              <Sparkles className="w-3 h-3 text-amber-300" />
+              <span>{mode === 'word' ? 'نماذج ومحاكاة' : 'محاكي إكسل ⚡'}</span>
             </button>
           )}
 

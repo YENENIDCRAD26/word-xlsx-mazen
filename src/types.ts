@@ -67,9 +67,12 @@ export interface CellData {
   bg?: string;
   align?: 'right' | 'center' | 'left';
   valign?: 'top' | 'middle' | 'bottom';
-  format?: 'general' | 'currency_sar' | 'currency_usd' | 'percent' | 'number' | 'date';
+  format?: 'general' | 'currency_sar' | 'currency_usd' | 'currency_yer' | 'percent' | 'number' | 'date' | string;
   border?: boolean;
+  borderStyle?: 'all' | 'box' | 'bottom' | 'double_bottom' | 'none';
+  borderColor?: string;
   wrapText?: boolean;
+  fontSize?: number;
 }
 
 export interface ExcelSheet {

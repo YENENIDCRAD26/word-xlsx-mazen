@@ -199,6 +199,18 @@ export const ExcelGrid: React.FC<ExcelGridProps> = ({
                       }
                     }
 
+                    // Calculate custom border styling
+                    let customBorderStyle: React.CSSProperties = {};
+                    if (cell?.borderStyle === 'double_bottom') {
+                      customBorderStyle = { borderBottom: `3px double ${cell.borderColor || '#0369a1'}` };
+                    } else if (cell?.borderStyle === 'box') {
+                      customBorderStyle = { border: `2px solid ${cell.borderColor || '#15803d'}` };
+                    } else if (cell?.borderStyle === 'all') {
+                      customBorderStyle = { border: `1px solid ${cell.borderColor || '#94a3b8'}` };
+                    } else if (cell?.borderStyle === 'bottom') {
+                      customBorderStyle = { borderBottom: `2px solid ${cell.borderColor || '#334155'}` };
+                    }
+
                     return (
                       <td
                         key={addr}
@@ -222,6 +234,8 @@ export const ExcelGrid: React.FC<ExcelGridProps> = ({
                           whiteSpace: cell?.wrapText ? 'normal' : 'nowrap',
                           overflow: cell?.wrapText ? 'visible' : 'hidden',
                           textOverflow: cell?.wrapText ? 'clip' : 'ellipsis',
+                          fontSize: cell?.fontSize ? `${cell.fontSize}px` : undefined,
+                          ...customBorderStyle,
                         }}
                       >
                         {isCellEditing ? (
