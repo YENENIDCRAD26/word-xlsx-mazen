@@ -1,0 +1,6 @@
+{
+  "name": "Word & Excel Editor PRO - محرر وورد وإكسل",
+  "description": "تطبيق مكتبي متكامل لمعالجة وتحرير المستندات النصية (Word) وجداول البيانات التفاعلية (Excel) مع لوحة مفاتيح عربية مخصصة للتشكيل وأدوات التصدير والحسابات.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
